@@ -73,7 +73,8 @@ namespace picoscope {
     void captureBlock();
     float adcToMv(float raw, chRange range);
     int32_t maxADCValue(devResolution r);
-    static void callBack(short handle, PICO_STATUS status, void *pParam); 
+    static void callBack(short handle, PICO_STATUS status, void *pParam);
+
   private:
     vector< vector< short> > waveforms; 
     bool *ready; 

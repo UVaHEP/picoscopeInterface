@@ -19,7 +19,8 @@ namespace picoscope {
     _postTriggerSamples = 100;
     _nsamples = 200; 
     _timebase = 2; 
-    _resolution = PS_8BIT; 
+    _resolution = PS_8BIT;
+
     chNameMap.emplace(A, PS5000A_CHANNEL_A);
     chNameMap.emplace(B, PS5000A_CHANNEL_B);
     chNameMap.emplace(C, PS5000A_CHANNEL_C);
@@ -259,6 +260,7 @@ namespace picoscope {
   unsigned long ps5000a::segment() {
 
   }
+
 
 
   float ps5000a::adcToMv(float raw, chRange range) {

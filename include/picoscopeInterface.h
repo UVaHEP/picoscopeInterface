@@ -71,6 +71,12 @@ namespace picoscope {
     PS_16BIT
   }; 
 
+  enum timebases {
+
+
+
+  }; 
+  
   
   typedef tuple<chName, chBandwidth, chCoupling, chRange, float, bool> Channel; 
   typedef map<chName, Channel> ChannelList; 

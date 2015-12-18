@@ -2,22 +2,23 @@ import os
 import subprocess 
 
 include = Dir('#/include')
-gmockIncDir = Dir('/home/hurt/tools/gmock/include')
-gTestIncDir = Dir('/home/hurt/tools/gmock/gtest/include')
+#gmockIncDir = Dir('/home/hurt/tools/gmock/include')
+#gTestIncDir = Dir('/home/hurt/tools/gmock/gtest/include')
 
-gmockLibDir = Dir('/home/hurt/tools/gmock/build')
-gTestLibDir = Dir('/home/hurt/tools/gmock/gtest/build')
+#gmockLibDir = Dir('/home/hurt/tools/gmock/build')
+#gTestLibDir = Dir('/home/hurt/tools/gmock/gtest/build')
 
 picoscopeInclude = Dir('/opt/picoscope/include')
 Import('env')
 env.Append(RPATH = ('/home/hurt/ProgrammingProjects/picoscopeInterface/lib'))
 
-env.Append(LIBPATH=['#/lib', gmockLibDir, gTestLibDir])
-env['CPPPATH'].append(gmockIncDir)
-env['CPPPATH'].append(gTestIncDir)
+#env.Append(LIBPATH=['#/lib', gmockLibDir, gTestLibDir])
+env.Append(LIBPATH=['#/lib'])
+#env['CPPPATH'].append(gmockIncDir)
+#env['CPPPATH'].append(gTestIncDir)
 env['CPPPATH'].append('/usr/include/python2.7')
-env.Append(LIBS=['libpicoscopeInterface', 'ps6404', 'gmock', 'gtest', 'python2.7', 'boost_python', 'ps5444b', 'ps5000a'])
-
+#env.Append(LIBS=['libpicoscopeInterface', 'ps6404', 'gmock', 'gtest', 'python2.7', 'boost_python', 'ps5444b', 'ps5000a'])
+env.Append(LIBS=['libpicoscopeInterface', 'ps6404', 'python2.7', 'ps5444b', 'ps5000a'])
 
 interfaceLib = File('#/lib/libpicoscopeInterface.so')
 env.Program('interfaceTest', ['interfaceTest.cc', 'testRunner.cc'])
@@ -30,8 +31,8 @@ Rootenv.Append(LIBS=['picoscopeInterface', 'ps5000a', 'ps5444b', 'ps6000'])
 Rootenv.Append(RPATH = ('/home/hurt/ProgrammingProjects/picoscopeInterface/lib'))
 
 #junkTest = benv.Program('junkTest', ['junktest.cc'])
-test6000 = env.Program('test6000', ['test6000.cc'])
-findMaxADC = env.Program('findMaxADC', ['findMaxADCs.cc'])
+#test6000 = env.Program('test6000', ['test6000.cc'])
+#findMaxADC = env.Program('findMaxADC', ['findMaxADCs.cc'])
 root5000 = Rootenv.Program('root5000', ['root5000.cc'])
 #pythonTest = env.SharedLibrary('PicoscopeTest', ['boostPython.cc'])
 
