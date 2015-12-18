@@ -21,8 +21,8 @@ env['CPPPATH'].append('/usr/include/python2.7')
 env.Append(LIBS=['libpicoscopeInterface', 'ps6404', 'python2.7', 'ps5444b', 'ps5000a'])
 
 interfaceLib = File('#/lib/libpicoscopeInterface.so')
-env.Program('interfaceTest', ['interfaceTest.cc', 'testRunner.cc'])
-test5000a = env.Program('test5000a', ['test5000a.cc', 'testRunner.cc'])
+#env.Program('interfaceTest', ['interfaceTest.cc', 'testRunner.cc'])
+#test5000a = env.Program('test5000a', ['test5000a.cc', 'testRunner.cc'])
 benv = Environment(CCFLAGS='-std=c++11', CPPPATH=[include, picoscopeInclude, '/usr/include/python2.7'], LIBPATH=['/opt/picoscope/lib', './lib'])
 
 Rootenv = Environment(CCFLAGS='-std=c++11', CPPPATH=[include, picoscopeInclude, '/usr/include/python2.7'], LIBPATH=['/opt/picoscope/lib', '#/lib'])
