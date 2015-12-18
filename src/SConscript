@@ -1,0 +1,24 @@
+import os
+
+
+include = Dir('#/include')
+picoscopeInclude = Dir('/opt/picoscope/include')
+env = Environment(LIBS=['ps6000'], CCFLAGS=' -ggdb  -std=c++11', CPPPATH=[include, picoscopeInclude], LIBPATH=['#/lib', '/opt/picoscope/lib', '.'])
+
+env.Append(RPATH = ('/home/hurt/ProgrammingProjects/picoscopeDriver/lib'))
+env.ParseConfig("root-config --cflags --glibs")
+
+
+## Generate Root Dictionary File 
+cintBuilder = Builder(action = 'rootcint -f $TARGET -c $SOURCES')
+env.Append(BUILDERS= {'cint': cintBuilder})
+
+
+
+psInterface = env.SharedLibrary('picoscopeInterface', ['picoscopeInterface.cc'])
+psInstInterface = env.Install('#/lib', [psInterface])
+ps6000Interface = env.SharedLibrary('ps6404', ['ps6000.cc' ])
+ps5000aInterface = env.SharedLibrary('ps5444b', ['ps5000a.cc'])
+env.Install('#/lib', ps6000Interface)
+env.Install('#/lib', ps5000aInterface)
+

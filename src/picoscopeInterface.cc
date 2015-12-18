@@ -11,7 +11,8 @@ namespace picoscope {
     _serial = -1; 
     _opened = false;
     _update = true; 
-
+    _maxADCValue = 32767;
+    
     channels[A] = Channel(A,
 			  BW_FULL,
 			  DC_50R,
@@ -45,6 +46,7 @@ namespace picoscope {
   bool picoscopeBase::open() { std::cout << "Not implemented." << std::endl; };
   void picoscopeBase::close() { std::cout << "Not implemented." << std::endl; };  
   bool picoscopeBase::openUnit(const string &serial) { std::cout << "Not implemented." << std::endl; };
+  void picoscopeBase::setDeviceResolution(devResolution r) { std::cout << "Not implemented." << std::endl; };  
   void picoscopeBase::psUpdate() { std::cout << "PS Update, not implemented" << std::endl; }; 
   string* picoscopeBase::unitInfo() { return NULL; };
 
@@ -58,6 +60,10 @@ namespace picoscope {
     std::get<aenabled>(channels[name]) = false;
     psUpdate(); 
     }
+  void picoscopeBase::setBandwidthFilter(chName name, chBandwidth bw) {
+    std::get<abandwidth>(channels[name]) = bw;
+    psUpdate();
+  }
   void picoscopeBase::enableBandwidthLimit(chName name) {
     std::get<abandwidth>(channels[name]) = BW_20MHZ;
     psUpdate(); 
@@ -96,18 +102,36 @@ namespace picoscope {
   void picoscopeBase::setTimebase(unsigned long timebase) { std::cout << "Not implemented." << std::endl; };  
   void picoscopeBase::setTimebaseNS(float interval) { std::cout << "Not implemented." << std::endl; };  
   void picoscopeBase::setPreTriggerSamples(unsigned int samples) { std::cout << "Not implemented." << std::endl; };  
-  void picoscopeBase::setPostTriggerSamples(unsigned int samples) { std::cout << "Not implemented." << std::endl; };  
-
+  void picoscopeBase::setPostTriggerSamples(unsigned int samples) { std::cout << "Not implemented." << std::endl; };
+  void picoscopeBase::setSamples(unsigned int samples) {
+std::cout << "Not implemented." << std::endl; };
+  float picoscopeBase::calculateTimebase(unsigned int timebase, devResolution r) {
+    std::cout << "Not Implemented." << std::endl;
+  }
   bool picoscopeBase::oversample() { std::cout << "Not implemented." << std::endl; };  
   unsigned long picoscopeBase::maxSamples() { std::cout << "Not implemented." << std::endl; };  
   unsigned long picoscopeBase::timebase() { std::cout << "Not implemented." << std::endl; };  
-  float picoscopeBase::timebaseNS() { std::cout << "Not implemented." << std::endl; };  
-  void picoscopeBase::setDeviceResolution(resolution r) { std::cout << "Not implemented." << std::endl; };  
+  float picoscopeBase::timebaseNS() { std::cout << "Not implemented." << std::endl; };
 
+  float picoscopeBase::adcToMv(float raw, chRange range) {
+    return 0;
+  }
   void picoscopeBase::setSegment(unsigned long segment) { std::cout << "Not implemented." << std::endl; };  
   unsigned long picoscopeBase::segment() { std::cout << "Not implemented." << std::endl; };
 
 
+  void picoscopeBase::setCaptureCount(unsigned int caps) {
+    _captures = caps;
+  }
+
+  unsigned int picoscopeBase::getCaptureCount() {
+    return _captures;
+  }
+    
+  int32_t picoscopeBase::maxAdcValue(devResolution r) {
+    return _maxADCValue;
+  }
+  
 }
 
  

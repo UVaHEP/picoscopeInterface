@@ -47,6 +47,7 @@ namespace picoscope {
 
   }
 
+  
 
   bool ps6000::open() {
 
@@ -78,6 +79,11 @@ namespace picoscope {
     statusProcessor(status); 
   }
 
+  void ps6000::setDeviceResolution(devResolution r) {
+
+
+  }
+
 
   bool ps6000::statusProcessor(PICO_STATUS status) { 
   switch (status) { 
@@ -103,7 +109,7 @@ namespace picoscope {
     PS6000_CHANNEL name;
     PS6000_RANGE range;
     PS6000_BANDWIDTH_LIMITER limit;
-    PS6000_COUPLING coupling; 
+    PS6000_COUPLING coupling;
     float offset;
     bool enabled; 
     PICO_STATUS status; 
@@ -197,10 +203,7 @@ namespace picoscope {
   float ps6000::timebaseNS() {
 
   }
-  
-  void ps6000::setDeviceResolution(resolution r) {
 
-  }
   
   void ps6000::setSegment(unsigned long segment) {
 

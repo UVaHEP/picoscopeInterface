@@ -13,7 +13,8 @@
 using std::string; 
 
 namespace picoscope {
-
+  //Note: Adding a bool for chRes 6404 even though its not used to
+  //keep the sizes of the tuple the same
   typedef tuple<PS6000_CHANNEL, PS6000_BANDWIDTH_LIMITER, PS6000_COUPLING, PS6000_RANGE, float, bool> nativeChannel;
 
 
@@ -34,7 +35,8 @@ namespace picoscope {
     void close();
     void psUpdate(); 
     bool statusProcessor(PICO_STATUS status);
-
+    void setDeviceResolution(devResolution r);
+    
     //Lookup Fns -- May want to replace with maps/arrays/etc
     nativeChannel convertChannel(chName name); 
     PS6000_COUPLING lookupChCoupling(chCoupling coupling); 
@@ -71,7 +73,6 @@ namespace picoscope {
     unsigned long maxSamples(); 
     unsigned long timebase(); 
     float timebaseNS(); 
-    void setDeviceResolution(resolution r); 
 
     void setSegment(unsigned long segment); 
     unsigned long segment();

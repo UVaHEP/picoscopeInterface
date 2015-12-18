@@ -42,7 +42,8 @@ namespace picoscope {
     A,
     B,
     C,
-    D
+    D,
+    EXT
   }; 
 
 
@@ -62,17 +63,18 @@ namespace picoscope {
   PS_50V
   }; 
 
-  typedef tuple<chName, chBandwidth, chCoupling, chRange, float, bool> Channel; 
-  typedef map<chName, Channel> ChannelList; 
-
-  
-  enum resolution {
+  enum devResolution {
     PS_8BIT,
     PS_12BIT,
     PS_14BIT,
     PS_15BIT,
     PS_16BIT
   }; 
+
+  
+  typedef tuple<chName, chBandwidth, chCoupling, chRange, float, bool> Channel; 
+  typedef map<chName, Channel> ChannelList; 
+
   
   enum triggerDirection {
     trgRising,
@@ -119,11 +121,12 @@ namespace picoscope {
 
     virtual bool open(); 
     virtual bool openUnit(const string &serial);
+    virtual void setDeviceResolution(devResolution r); 
     virtual void close(); 
     virtual string* unitInfo(); 
     virtual void psUpdate(); 
 
-    //Channel Functions -- Note, have them return a PICO_STATUS value
+    //Channel Functions
     virtual void enableChannel(chName name);
     virtual void disableChannel(chName name); 
     virtual void setChCoupling(chName name, chCoupling coupling);
@@ -131,7 +134,9 @@ namespace picoscope {
     virtual void disableBandwidthLimit(chName name);
     virtual void setChAnalogOffset(chName name, float offset); 
     virtual void resetChannel(chName name);
-    virtual void setChRange(chName name, chRange range); 
+    virtual void setChRange(chName name, chRange range);
+    virtual void setBandwidthFilter(chName name, chBandwidth bw); 
+    
     //Trigger Functions
     virtual void setTriggerChannel(chName name);
     virtual void setTriggerLevel(short adcCount);
@@ -147,22 +152,35 @@ namespace picoscope {
     virtual void setTimebaseNS(float interval); 
     virtual void setPreTriggerSamples(unsigned int samples); 
     virtual void setPostTriggerSamples(unsigned int samples); 
+    virtual void setSamples(unsigned int samples);
 
+    virtual float adcToMv(float raw, chRange range);
+    virtual int32_t maxAdcValue(devResolution r); 
     virtual bool oversample(); 
     virtual unsigned long maxSamples(); 
     virtual unsigned long timebase(); 
     virtual float timebaseNS(); 
-    virtual void setDeviceResolution(resolution r); 
+    virtual float calculateTimebase(unsigned int timebase, devResolution r); 
 
     virtual void setSegment(unsigned long segment); 
     virtual unsigned long segment();
+    virtual void setCaptureCount(unsigned int caps); 
+    virtual unsigned int getCaptureCount();
 
+    
     protected:
     int8_t _serial; 
-    int16_t _handle; 
+    int16_t _handle;
+    int32_t _maxADCValue; 
     bool _opened; 
     bool _update; 
+    devResolution _resolution;
+    unsigned int _captures;
 
+    
+    unsigned int _preTriggerSamples;
+    unsigned int _postTriggerSamples;
+    unsigned int _nsamples; 
     float _timeIntervalNS; 
     unsigned long _maxSamples; 
     unsigned long _timebase; 
@@ -181,4 +199,5 @@ namespace picoscope {
 
 
 #endif
+
 

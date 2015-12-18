@@ -1,0 +1,37 @@
+import os
+import subprocess 
+
+include = Dir('#/include')
+gmockIncDir = Dir('/home/hurt/tools/gmock/include')
+gTestIncDir = Dir('/home/hurt/tools/gmock/gtest/include')
+
+gmockLibDir = Dir('/home/hurt/tools/gmock/build')
+gTestLibDir = Dir('/home/hurt/tools/gmock/gtest/build')
+
+picoscopeInclude = Dir('/opt/picoscope/include')
+Import('env')
+env.Append(RPATH = ('/home/hurt/ProgrammingProjects/picoscopeInterface/lib'))
+
+env.Append(LIBPATH=['#/lib', gmockLibDir, gTestLibDir])
+env['CPPPATH'].append(gmockIncDir)
+env['CPPPATH'].append(gTestIncDir)
+env['CPPPATH'].append('/usr/include/python2.7')
+env.Append(LIBS=['libpicoscopeInterface', 'ps6404', 'gmock', 'gtest', 'python2.7', 'boost_python', 'ps5444b', 'ps5000a'])
+
+
+interfaceLib = File('#/lib/libpicoscopeInterface.so')
+env.Program('interfaceTest', ['interfaceTest.cc', 'testRunner.cc'])
+test5000a = env.Program('test5000a', ['test5000a.cc', 'testRunner.cc'])
+benv = Environment(CCFLAGS='-std=c++11', CPPPATH=[include, picoscopeInclude, '/usr/include/python2.7'], LIBPATH=['/opt/picoscope/lib', './lib'])
+
+Rootenv = Environment(CCFLAGS='-std=c++11', CPPPATH=[include, picoscopeInclude, '/usr/include/python2.7'], LIBPATH=['/opt/picoscope/lib', '#/lib'])
+Rootenv.ParseConfig("root-config --cflags --libs")
+Rootenv.Append(LIBS=['picoscopeInterface', 'ps5000a', 'ps5444b', 'ps6000'])
+Rootenv.Append(RPATH = ('/home/hurt/ProgrammingProjects/picoscopeInterface/lib'))
+
+#junkTest = benv.Program('junkTest', ['junktest.cc'])
+test6000 = env.Program('test6000', ['test6000.cc'])
+findMaxADC = env.Program('findMaxADC', ['findMaxADCs.cc'])
+root5000 = Rootenv.Program('root5000', ['root5000.cc'])
+#pythonTest = env.SharedLibrary('PicoscopeTest', ['boostPython.cc'])
+
