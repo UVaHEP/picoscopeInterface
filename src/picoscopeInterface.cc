@@ -15,28 +15,28 @@ namespace picoscope {
     
     channels[A] = Channel(A,
 			  BW_FULL,
-			  DC_50R,
+			  DC,
 			  PS_1V,
 			  0.0,
 			  false); 
 
     channels[B] = Channel(B,
 			  BW_FULL,
-			  DC_50R,
+			  DC,
 			  PS_1V,
 			  0.0,
 			  false);
 
     channels[C] = Channel(C,
 			  BW_FULL,
-			  DC_50R,
+			  DC,
 			  PS_1V,
 			  0.0,
 			  false); 
 
     channels[D] = Channel(D, 
 			  BW_FULL,
-			  DC_50R,
+			  DC,
 			  PS_1V,
 			  0.0,
 			  false); 

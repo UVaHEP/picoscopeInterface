@@ -5,7 +5,7 @@ include = Dir('#/include')
 picoscopeInclude = Dir('/opt/picoscope/include')
 env = Environment(LIBS=['ps6000'], CCFLAGS=' -ggdb  -std=c++11', CPPPATH=[include, picoscopeInclude], LIBPATH=['#/lib', '/opt/picoscope/lib', '.'])
 
-env.Append(RPATH = ('/home/hurt/ProgrammingProjects/picoscopeDriver/lib'))
+env.Append(RPATH = ('#/lib'))
 env.ParseConfig("root-config --cflags --glibs")
 
 

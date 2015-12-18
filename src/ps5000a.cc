@@ -207,7 +207,7 @@ namespace picoscope {
   }
   
   void ps5000a::setTimebase(unsigned long timebase) {
-    
+    _timebase = timebase; 
   }
   
   void ps5000a::setTimebaseNS(float interval) {
