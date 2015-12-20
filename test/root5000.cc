@@ -9,7 +9,6 @@ using namespace picoscope;
 
 int main() {
 
-
   ps5000a dev;
   //  int samples = 100;
   int samples = 40000;
