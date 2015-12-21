@@ -11,8 +11,8 @@ include = Dir('#/include')
 picoscopeInclude = Dir('/opt/picoscope/include')
 Import('env')
 rpathLib = Dir('#/lib')
-env.Append(RPATH = '/home/hurt/ProgrammingProjects/picoscopeInterface/lib')
-
+env['RPATH'] = str(rpathLib)
+print env['RPATH']
 #env.Append(LIBPATH=['#/lib', gmockLibDir, gTestLibDir])
 env.Append(LIBPATH=['#/lib'])
 #env['CPPPATH'].append(gmockIncDir)
@@ -29,8 +29,9 @@ benv = Environment(CCFLAGS='-std=c++11', CPPPATH=[include, picoscopeInclude, '/u
 Rootenv = Environment(CCFLAGS='-std=c++11', CPPPATH=[include, picoscopeInclude, '/usr/include/python2.7'], LIBPATH=['/opt/picoscope/lib', '#/lib'])
 Rootenv.ParseConfig("root-config --cflags --libs")
 Rootenv.Append(LIBS=['picoscopeInterface', 'ps5000a', 'ps5444b', 'ps6000'])
-Rootenv.Append(RPATH = '/home/hurt/ProgrammingProjects/picoscopeInterface/lib')
-
+#Rootenv.Append(RPATH = '/home/hurt/ProgrammingProjects/picoscopeInterface/lib')
+Rootenv['RPATH'] = str(rpathLib)
+print Rootenv['RPATH']
 
 #junkTest = benv.Program('junkTest', ['junktest.cc'])
 #test6000 = env.Program('test6000', ['test6000.cc'])
