@@ -25,7 +25,7 @@ void PHD(TH1F* h, TH1F* p, int firstbin, int lastbin){
 
 void rootTest(){
   ps5000a dev;
-  int samples = 40000;
+  int samples = 100;
   chRange range = PS_20MV;
   dev.open(picoscope::PS_12BIT);
   dev.setChCoupling(picoscope::A, picoscope::DC);
@@ -34,12 +34,12 @@ void rootTest(){
 
   dev.enableBandwidthLimit(picoscope::A); 
   dev.setTimebase(1);
-  //  dev.setSimpleTrigger(EXT, 18000, trgRising, 0, 0); 
+  dev.setSimpleTrigger(EXT, 18000, trgRising, 0, 0); 
   dev.setSamples(samples); 
   dev.setPreTriggerSamples(samples/2);
   dev.setPostTriggerSamples(samples/2);
-  //  dev.setCaptureCount(100000);
-  dev.setCaptureCount(20);
+  dev.setCaptureCount(100000);
+  //  dev.setCaptureCount(20);
   
 
   dev.prepareBuffers();
@@ -51,7 +51,7 @@ void rootTest(){
   vector <vector<short> > data = dev.getWaveforms();
 
   
-  TFile f("test.root", "RECREATE");
+  //  TFile *f = new TFile("test.root", "RECREATE");
   std::cout << "writing waveforms..." << std::endl;
 
   TH1F *dT  = new  TH1F("dT", "Time Steps [ns]", 1,0,1);
@@ -59,8 +59,8 @@ void rootTest(){
   TH1F *dV = new TH1F("dV", "Voltage Steps[mV]", 1,0,1);
   dV->Fill(0.0, dev.adcToMv(1, range));
   std::cout << "dV:" << dev.adcToMv(1, range) << std::endl; 
-  dT->Write();
-  dV->Write();
+  //  dT->Write();
+  //  dV->Write();
 
   
   TH2F *hpersist=new TH2F("hpersist","Persistance Display",samples,
@@ -80,20 +80,29 @@ void rootTest(){
     }
     PHD(hsamp,hpulses1,54,72);
     PHD(hsamp,hpulses0,4,22);
-    hpersist->Write(); 
+    delete hsamp; 
+    //    hpersist->Write(); 
   }
-
+  TFile *f = new TFile("test.root", "RECREATE");
+  
   TCanvas *tc=new TCanvas("tc","Pulse heights",1800,600);
   tc->Divide(3,1);
   tc->cd(1)->SetLogy();
-  hpersist->ProjectionY()->Draw();
+  hpersist->ProjectionY("_py1",54,72)->Draw();
+  hpersist->ProjectionY("_py0",4,22)->Draw("same");
   tc->cd(2);
   hpersist->Draw("col");
-  
+  tc->cd(3);
+  hpulses1->Draw(); 
   hpulses0->Scale( hpulses1->GetMaximum()/hpulses0->GetMaximum() );
   hpulses0->Draw("same");
-  //f.Close(); 
+  tc->Update();
 
+  hpersist->Write();
+  hpulses0->Write();
+  hpulses1->Write(); 
+  //f.Close(); 
+  f->Close();
 }
 
 
@@ -104,7 +113,7 @@ int main(int argc, char **argv) {
 
   std::cout << "Hit any ^c to exit" << std::endl;
   theApp.Run(true);
-
+  
   
   return 0;
 

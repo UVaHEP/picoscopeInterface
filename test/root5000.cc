@@ -10,8 +10,8 @@ using namespace picoscope;
 int main() {
 
   ps5000a dev;
-  //  int samples = 100;
-  int samples = 40000;
+  //int samples = 100;
+    int samples = 200;
   chRange range = PS_20MV;
   dev.open(picoscope::PS_12BIT);
   dev.setChCoupling(picoscope::A, picoscope::DC);
@@ -20,12 +20,12 @@ int main() {
 
   dev.enableBandwidthLimit(picoscope::A); 
   dev.setTimebase(1);
-  //  dev.setSimpleTrigger(EXT, 18000, trgRising, 0, 0); 
+  dev.setSimpleTrigger(EXT, 18000, trgRising, 0, 0); 
   dev.setSamples(samples); 
   dev.setPreTriggerSamples(samples/2);
   dev.setPostTriggerSamples(samples/2);
-  //  dev.setCaptureCount(100000);
-  dev.setCaptureCount(20);
+  dev.setCaptureCount(10000);
+  //dev.setCaptureCount(20);
   dev.prepareBuffers();
   dev.captureBlock(); 
   dev.close();
