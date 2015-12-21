@@ -36,7 +36,9 @@ print Rootenv['RPATH']
 #junkTest = benv.Program('junkTest', ['junktest.cc'])
 #test6000 = env.Program('test6000', ['test6000.cc'])
 #findMaxADC = env.Program('findMaxADC', ['findMaxADCs.cc'])
-root5000 = Rootenv.Program('root5000', ['root5000.cc'])
-root5000 = Rootenv.Program('rootTest', ['rootTest.cc'])
+#root5000 = Rootenv.Program('root5000', ['root5000.cc'])
+#root5000 = Rootenv.Program('rootTest', ['rootTest.cc'])
+root5000 = Rootenv.Program('darkBuffers', ['darkBuffers.cc'])
+root5000 = Rootenv.Program('pulseMeasurements', ['pulseMeasurements.cc'])
 #pythonTest = env.SharedLibrary('PicoscopeTest', ['boostPython.cc'])
 
