@@ -26,9 +26,9 @@ interfaceLib = File('#/lib/libpicoscopeInterface.so')
 #test5000a = env.Program('test5000a', ['test5000a.cc', 'testRunner.cc'])
 benv = Environment(CCFLAGS='-std=c++11', CPPPATH=[include, picoscopeInclude, '/usr/include/python2.7'], LIBPATH=['/opt/picoscope/lib', './lib'])
 
-Rootenv = Environment(CCFLAGS='-std=c++11', CPPPATH=[include, picoscopeInclude, '/usr/include/python2.7'], LIBPATH=['/opt/picoscope/lib', '#/lib'])
+Rootenv = Environment(CCFLAGS='-std=c++11 -ggdb', CPPPATH=[include, picoscopeInclude, '/usr/include/python2.7'], LIBPATH=['/opt/picoscope/lib', '#/lib'])
 Rootenv.ParseConfig("root-config --cflags --libs")
-Rootenv.Append(LIBS=['picoscopeInterface', 'ps5000a', 'ps5444b', 'ps6000', 'Spectrum'])
+Rootenv.Append(LIBS=['picoscopeInterface', 'ps5000a', 'ps5444b', 'ps6000', 'Spectrum','utils'])
 #Rootenv.Append(RPATH = '/home/hurt/ProgrammingProjects/picoscopeInterface/lib')
 Rootenv['RPATH'] = str(rpathLib)
 print Rootenv['RPATH']

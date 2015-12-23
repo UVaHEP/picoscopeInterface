@@ -14,7 +14,7 @@ env.ParseConfig("root-config --cflags --glibs")
 cintBuilder = Builder(action = 'rootcint -f $TARGET -c $SOURCES')
 env.Append(BUILDERS= {'cint': cintBuilder})
 
-Rootenv = Environment(CCFLAGS='-std=c++11', CPPPATH=[include, picoscopeInclude, '/usr/include/python2.7'], LIBPATH=['/opt/picoscope/lib', '#/lib'])
+Rootenv = Environment(CCFLAGS='-std=c++11 -ggdb', CPPPATH=[include, picoscopeInclude, '/usr/include/python2.7'], LIBPATH=['/opt/picoscope/lib', '#/lib'])
 Rootenv.ParseConfig("root-config --cflags --libs")
 Rootenv.Append(LIBS=['picoscopeInterface', 'ps5000a', 'ps5444b', 'ps6000', 'Spectrum'])
 Rootenv['RPATH'] = str(rpathLib)

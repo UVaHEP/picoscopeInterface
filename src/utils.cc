@@ -8,14 +8,16 @@ using std::endl;
 DarkPeaker::DarkPeaker(){
   tspectrum=new TSpectrum(1000,2);
   buf=0;
+  hbkg=0;
+  bkgCorrectedY=0;
+  hdist=0;
 }
 void DarkPeaker::SetBuffer(TH1F *newbuf, double sampleTime){
   buf=newbuf;
   dT=sampleTime;
   if (hbkg) delete hbkg;
-  hbkg=0;
-  if(bkgCorrectedY) delete bkgCorrectedY;
-  bkgCorrectedY=0;
+  //if (bkgCorrectedY) delete bkgCorrectedY;
+  if (hdist) delete hdist;
   npeaks=0;
 }
 int DarkPeaker::GetNPeaks(){return npeaks;}
@@ -71,6 +73,7 @@ void DarkPeaker::FindBackground(){
   int nbins=buf->GetNbinsX();
   float *bksource=new float[nbins];
   for (int i = 0; i < nbins; i++) bksource[i]=buf->GetBinContent(i + 1);
+  /*
   TH1 *hfft;
   hfft=buf->FFT(0,"RE");
   double sum=0, sumw=0;
@@ -84,6 +87,7 @@ void DarkPeaker::FindBackground(){
   cout << "FFT estimate of baseline range: " << sum/sumw << endl;
   cout << "FFT estimate of baseline range: " << hfft->GetMaximumBin() << endl;
   delete hfft;
+  */
   tspectrum->Background(bksource,nbins,180,TSpectrum::kBackDecreasingWindow,
    			TSpectrum::kBackOrder4,kTRUE,
   			TSpectrum::kBackSmoothing3,kFALSE);
