@@ -22,11 +22,8 @@ void PHD(TH1F* h, TH1F* p, int firstbin, int lastbin){
 }
 
 
+void setupPicoscope(ps5000a &dev, chRange range, int samples) {
 
-void rootTest(){
-  ps5000a dev;
-  int samples = 100;
-  chRange range = PS_20MV;
   dev.open(picoscope::PS_12BIT);
   dev.setChCoupling(picoscope::A, picoscope::DC);
   dev.setChRange(picoscope::A, range);
@@ -38,15 +35,22 @@ void rootTest(){
   dev.setSamples(samples); 
   dev.setPreTriggerSamples(samples/2);
   dev.setPostTriggerSamples(samples/2);
-  dev.setCaptureCount(100000);
+  dev.setCaptureCount(10000);
+  dev.prepareBuffers();  
+
+
+
+}
+
+
+void rootTest(){
+  ps5000a dev;
   //  dev.setCaptureCount(20);
-  
+  int samples = 100;
+  chRange range = PS_50MV;
+  setupPicoscope(dev, range, samples); 
 
-  dev.prepareBuffers();
-  dev.captureBlock(); 
-  dev.close();
-
-  float timebase = dev.timebaseNS();
+  /*  float timebase = dev.timebaseNS();
   std::cout << "Timebase: " << timebase << std::endl; 
   vector <vector<short> > data = dev.getWaveforms();
 
@@ -63,26 +67,39 @@ void rootTest(){
   //  dV->Write();
 
   
+  delete dT;
+  delete dV; 
+  */
+  
+
+
   TH2F *hpersist=new TH2F("hpersist","Persistance Display",samples,
 			0,samples,100,0,15000);
 
   TH1F* hpulses1=new TH1F("hpulses1","Pulse area distribution",200,-20000,200000);
   TH1F* hpulses0=new TH1F("hpulses0","Pulse area distribution",200,-20000,200000);
 
-  
-  delete dT;
-  delete dV; 
-  for (auto &waveform : data) {
-    TH1F *hsamp = new TH1F("hsamp","Samples", waveform.size(), 0, waveform.size());
-    for (int i = 0; i < waveform.size(); i++) {
-      hpersist->Fill(i, -1*waveform[i]);
-      hsamp->SetBinContent(i, -1*waveform[i]);
-    }
-    PHD(hsamp,hpulses1,54,72);
-    PHD(hsamp,hpulses0,4,22);
-    delete hsamp; 
+
+  for (int i = 0; i < 75; i++) {
+    std::cout << "Capturing Block:" << i << std::endl;     
+    dev.captureBlock();
+
+    vector <vector<short> > data = dev.getWaveforms();
+    
+    for (auto &waveform : data) {
+      TH1F *hsamp = new TH1F("hsamp","Samples", waveform.size(), 0, waveform.size());
+      for (int i = 0; i < waveform.size(); i++) {
+	hpersist->Fill(i, -1*waveform[i]);
+	hsamp->SetBinContent(i, -1*waveform[i]);
+      }
+      PHD(hsamp,hpulses1,54,72);
+      PHD(hsamp,hpulses0,4,22);
+      delete hsamp; 
     //    hpersist->Write(); 
+    }
   }
+
+  dev.close(); 
   TFile *f = new TFile("test.root", "RECREATE");
   
   TCanvas *tc=new TCanvas("tc","Pulse heights",1800,600);

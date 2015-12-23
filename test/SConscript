@@ -28,7 +28,7 @@ benv = Environment(CCFLAGS='-std=c++11', CPPPATH=[include, picoscopeInclude, '/u
 
 Rootenv = Environment(CCFLAGS='-std=c++11', CPPPATH=[include, picoscopeInclude, '/usr/include/python2.7'], LIBPATH=['/opt/picoscope/lib', '#/lib'])
 Rootenv.ParseConfig("root-config --cflags --libs")
-Rootenv.Append(LIBS=['picoscopeInterface', 'ps5000a', 'ps5444b', 'ps6000'])
+Rootenv.Append(LIBS=['picoscopeInterface', 'ps5000a', 'ps5444b', 'ps6000', 'Spectrum'])
 #Rootenv.Append(RPATH = '/home/hurt/ProgrammingProjects/picoscopeInterface/lib')
 Rootenv['RPATH'] = str(rpathLib)
 print Rootenv['RPATH']

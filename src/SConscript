@@ -1,5 +1,6 @@
 import os
 
+rpathLib = Dir('#/lib')
 
 include = Dir('#/include')
 picoscopeInclude = Dir('/opt/picoscope/include')
@@ -13,6 +14,11 @@ env.ParseConfig("root-config --cflags --glibs")
 cintBuilder = Builder(action = 'rootcint -f $TARGET -c $SOURCES')
 env.Append(BUILDERS= {'cint': cintBuilder})
 
+Rootenv = Environment(CCFLAGS='-std=c++11', CPPPATH=[include, picoscopeInclude, '/usr/include/python2.7'], LIBPATH=['/opt/picoscope/lib', '#/lib'])
+Rootenv.ParseConfig("root-config --cflags --libs")
+Rootenv.Append(LIBS=['picoscopeInterface', 'ps5000a', 'ps5444b', 'ps6000', 'Spectrum'])
+Rootenv['RPATH'] = str(rpathLib)
+print Rootenv['RPATH']
 
 
 psInterface = env.SharedLibrary('picoscopeInterface', ['picoscopeInterface.cc'])
@@ -22,3 +28,5 @@ ps5000aInterface = env.SharedLibrary('ps5444b', ['ps5000a.cc'])
 env.Install('#/lib', ps6000Interface)
 env.Install('#/lib', ps5000aInterface)
 
+utils = Rootenv.SharedLibrary('utils', ['utils.cc'])
+env.Install('#/lib', utils)
