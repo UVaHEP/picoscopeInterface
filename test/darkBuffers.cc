@@ -3,11 +3,16 @@
 #include "TFile.h"
 #include "TGraph.h" 
 #include "TH1F.h"
+#include "TCanvas.h"
+#include "TStyle.h"
+#include "utils.h"
+#include <TApplication.h>
 
 
 using namespace picoscope;
 
-int main() {
+int main(int argc, char **argv) {
+  TApplication theApp("App", &argc, argv);
 
   ps5000a dev;
   //int samples = 100;
@@ -25,7 +30,7 @@ int main() {
   dev.setPreTriggerSamples(samples/2);
   dev.setPostTriggerSamples(samples/2);
   //  dev.setCaptureCount(10000);
-  dev.setCaptureCount(20);
+  dev.setCaptureCount(50);
   dev.prepareBuffers();
   dev.captureBlock(); 
   dev.close();
@@ -56,39 +61,61 @@ int main() {
   dV->Write();
 
   delete dT;
-  delete dV; 
+  delete dV;
+
+
+  // delta time distribution
+  TH1F *hdTime=new TH1F("hdTime","Delta times;x [2 ns]",50,0,500);
+  // pulse height distribution
+  TH1F* hpeaks=new TH1F("hpeaks","Peaks",100,0,15000);
+  TCanvas *tc=new TCanvas("tc","Samples",1800,600);
+  TCanvas *tc1=new TCanvas("tc1","Peaks and Time distribution",0,650,1800,600);
+  tc1->Divide(2,1);
+  gStyle->SetOptStat(0);
+  
+  DarkPeaker *dPk = new DarkPeaker();
+  
   for (auto &waveform : data) {
     hist = new TH1F("pulses", "pulses", waveform.size(), 0, waveform.size());
     for (int i = 0; i < waveform.size(); i++) {
       hist->SetBinContent(i, -1*waveform[i]);
     }
+
+    dPk->SetBuffer(hist,timebase);
+    dPk->AnalyzePeaks();
     
-    /*    for (int i = 0; i < waveform.size(); i++) {
-      graphWaveform[i] = float(dev.adcToMv(waveform[i], range));
-      }*/
+    // retrieve peak heights
+    Float_t *yvals = dPk->GetBkgdCorrectedY();
+    int npeaks=dPk->GetNPeaks();
 
-    //    TGraph *graph = new TGraph(graphtime.size(), graphtime.data(), graphWaveform.data());
-    //    graph->Write();
+    // Fill pulse height histogram
+    for (int i=0;i<npeaks;i++) hpeaks->Fill(yvals[i]);
+    
+    // fill delta time distro
+    Float_t *deltaX = dPk->GetDeltaX();
+    for (int i=0;i<npeaks-1;i++) hdTime->Fill(deltaX[i]);
 
-    //    delete graph;
+    // draw samples buffer with peaks and background
+    tc->cd();
+    hist->DrawCopy();
+    dPk->GetBackground()->Draw("same");
+    tc->Update();
+
+    // draw pulse analysis plots
+    tc1->cd(1);
+    hpeaks->Draw();
+    tc1->cd(2);
+    hdTime->Fit("expo","L");
+    tc1->Update();
+
     hist->Write(); 
     delete hist; 
-
   }
 
-
+  theApp.Run(true);
   f.Close(); 
   
-  /*  for (auto &waveform : data) {
-    std::cout << std::endl;
-    std::cout << std::endl; 
-    for (int i = 0; i < waveform.size(); i++) { 
-      std::cout << dev.adcToMv(waveform[i], range) << ", ";
 
-    }
-    std::cout << std::endl;
-    std::cout << std::endl;
-    }*/
 
   
   return 0;
