@@ -41,7 +41,7 @@ void rootTest(){
   //  dev.setCaptureCount(20);
   const int samples = 100;  // number of ADC samples per waveform
   const int NBUFFERS=10000; // number of waveforms per capture
-  const int NREPEAT=75;     // number of capture cycles
+  const int NREPEAT=5;     // number of capture cycles
   const int NSAVE=20;
   chRange range = PS_50MV;
   setupPicoscope(dev, range, samples, NBUFFERS); 
@@ -61,7 +61,7 @@ void rootTest(){
     std::cout << "Capturing Block:" << i << std::endl;     
     dev.captureBlock();
 
-    vector <vector<short> > data = dev.getWaveforms();
+    vector <vector<short> > &data = dev.getWaveforms();
     
     for (auto &waveform : data) {
       TH1F *hsamp = new TH1F("hsamp","Samples", waveform.size(), 0, waveform.size());
@@ -70,11 +70,12 @@ void rootTest(){
 	hsamp->SetBinContent(i, -1*waveform[i]);
       }
       hsum->Add(hsamp);
-      PHD(hsamp,hpulses1,54,72);
-      PHD(hsamp,hpulses0,4,22);
+      PHD(hsamp,hpulses1,50,65);
+      PHD(hsamp,hpulses0,0,15);
       if (wavSaved<NSAVE) {
 	waveForms[wavSaved]=
 	  (TH1F*)hsamp->Clone(TString::Format("wave%02d",wavSaved));
+	wavSaved++;
       }
       delete hsamp; 
     }
@@ -85,11 +86,12 @@ void rootTest(){
   
   TCanvas *tc=new TCanvas("tc","Pulse heights",1800,600);
   tc->Divide(3,1);
-
+  gStyle->SetOptStat(0);
+  
   // projections of persistance histogram to show counts vs threshold
   tc->cd(1)->SetLogy();
-  hpersist->ProjectionY("_py1",54,72)->DrawCopy();
-  hpersist->ProjectionY("_py0",4,22)->DrawCopy("same");
+  hpersist->ProjectionY("_py1",50,65)->DrawCopy();
+  hpersist->ProjectionY("_py0",0,15)->DrawCopy("same");
 
   // plot the persistance histogram
   tc->cd(2);
