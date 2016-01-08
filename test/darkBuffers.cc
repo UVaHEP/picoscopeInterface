@@ -103,9 +103,10 @@ int main(int argc, char **argv) {
 
     // draw pulse analysis plots
     tc1->cd(1);
-    hpeaks->Draw();
+    hpeaks->DrawCopy();
     tc1->cd(2);
     hdTime->Fit("expo","L");
+    hdTime->DrawCopy();
     tc1->Update();
 
     hist->Write(); 
@@ -115,7 +116,6 @@ int main(int argc, char **argv) {
   theApp.Run(true);
   f.Close(); 
   
-
 
   
   return 0;
