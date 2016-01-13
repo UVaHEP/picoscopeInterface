@@ -3,20 +3,65 @@
 #include "TFile.h"
 #include "TGraph.h" 
 #include "TH1F.h"
+#include "TString.h"
 #include "TCanvas.h"
 #include "TStyle.h"
 #include "utils.h"
 #include <TApplication.h>
-
+#include <getopt.h>
+#include <stdio.h>
 
 using namespace picoscope;
 
+void fitExp(TH1F *h, TString opt="L"){
+  h->Fit("expo",opt,"",h->GetBinCenter(8),h->GetXaxis()->GetXmax());
+  TF1 *fun2=new TF1(*(h->GetFunction("expo")));
+  fun2->SetName("expo2");
+  fun2->SetRange(h->GetXaxis()->GetXmin(),h->GetXaxis()->GetXmax());
+  fun2->SetLineStyle(2);
+  fun2->Draw("same");
+  h->GetListOfFunctions()->Add(fun2);
+}
+
+
 int main(int argc, char **argv) {
+
+  TString outfn="darkBuffers.root";
+  int samples = 40000;
+  int nbuffers = 50;
+  int opt;
+  bool quit=false;
+  bool quiet=false;
+  while ((opt = getopt(argc, argv, "b:n:o:hq0")) != -1) {
+    switch (opt) {
+    case 's':
+      samples = atoi(optarg);
+      break;
+    case 'b':
+      nbuffers=atoi(optarg);
+      break;
+    case 'o':
+      outfn = optarg;
+      std::cout<<"set outfn " << outfn<<std::endl;
+      break;
+    case 'q':
+      quit=true;
+      break;
+    case '0':
+      quiet=true;
+      break;	
+    case 'h':
+    default: /* '?' */
+      fprintf(stderr, "Usage: %s",argv[0]);
+      fprintf(stderr, "-s nsamples[40000] -b nbuffers[50] -o output[darkBuffers.root]\n");
+      exit(EXIT_FAILURE);
+    }
+  }
+
   TApplication theApp("App", &argc, argv);
 
+
   ps5000a dev;
-  //int samples = 100;
-    int samples = 40000;
   chRange range = PS_20MV;
   dev.open(picoscope::PS_12BIT);
   dev.setChCoupling(picoscope::A, picoscope::DC);
@@ -30,7 +75,7 @@ int main(int argc, char **argv) {
   dev.setPreTriggerSamples(samples/2);
   dev.setPostTriggerSamples(samples/2);
   //  dev.setCaptureCount(10000);
-  dev.setCaptureCount(50);
+  dev.setCaptureCount(nbuffers);
   dev.prepareBuffers();
   dev.captureBlock(); 
   dev.close();
@@ -48,7 +93,7 @@ int main(int argc, char **argv) {
   }
 
 
-  TFile f("test.root", "RECREATE");
+  TFile f(outfn, "RECREATE");
   std::cout << "writing waveforms..." << std::endl;
   TH1F *hist = NULL;
 
@@ -65,7 +110,7 @@ int main(int argc, char **argv) {
 
 
   // delta time distribution
-  TH1F *hdTime=new TH1F("hdTime","Delta times;x [2 ns]",50,0,500);
+  TH1F *hdTime=new TH1F("hdTime","Delta times;x [2 ns]",101,-2.5,502.5);
   // pulse height distribution
   TH1F* hpeaks=new TH1F("hpeaks","Peaks",100,0,15000);
   TCanvas *tc=new TCanvas("tc","Samples",1800,600);
@@ -79,6 +124,7 @@ int main(int argc, char **argv) {
     hist = new TH1F("pulses", "pulses", waveform.size(), 0, waveform.size());
     for (int i = 0; i < waveform.size(); i++) {
       hist->SetBinContent(i, -1*waveform[i]);
+      
     }
 
     dPk->SetBuffer(hist,timebase);
@@ -105,19 +151,29 @@ int main(int argc, char **argv) {
     tc1->cd(1);
     hpeaks->DrawCopy();
     tc1->cd(2);
-    hdTime->Fit("expo","L");
+    fitExp(hdTime,"LQ");
     hdTime->DrawCopy();
     tc1->Update();
 
     hist->Write(); 
     delete hist; 
   }
-
-  theApp.Run(true);
+  fitExp(hdTime,"L");
+  hdTime->DrawCopy();
+  tc1->Update();
+  
+  // Get the average dark pulse rate
+  TH1F *hRate=new TH1F("hRate","Dark Pulse Rate;;MHz",1,-1,1);
+  double meanDt = -2/hdTime->GetFunction("expo")->GetParameter(1);  // Dt in [ns]
+  double rate = 1 / meanDt * 1000;  // in MHz
+  std::cout << "Average dark pulse rate: " << rate << std::endl;
+  hRate->SetBinContent(1,rate);
+  hRate->SetBinError(1,rate*hdTime->GetFunction("expo")->GetParError(1)/
+		     hdTime->GetFunction("expo")->GetParameter(1));
+  hRate->Write();
   f.Close(); 
-  
-
-  
+  if (quit) return 0;
+  theApp.Run(true);
   return 0;
 
 

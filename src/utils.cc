@@ -6,7 +6,7 @@ using std::cout;
 using std::endl;
 
 DarkPeaker::DarkPeaker(){
-  tspectrum=new TSpectrum(1000,2);
+  tspectrum=new TSpectrum(5000,2);
   buf=0;
   hbkg=0;
   bkgCorrectedY=0;
