@@ -1,3 +1,5 @@
+#!/bin/bash -x
+
 # add directory to a path variable
 add_to_envVar () {
   ADDPATH=$1

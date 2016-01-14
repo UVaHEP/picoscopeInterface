@@ -21,6 +21,8 @@ parser.add_argument('-0', '--zero', action='store_true',
                     help="zero voltage measure")
 parser.add_argument('-o', '--output', type=str, default = "darkBuffers",
                     help="outputfile template")
+parser.add_argument('-b', '--nbuf', type=int, default = 5,
+                    help="number of buffers to take [5]")
 args = parser.parse_args()
 
 from ROOT import *
@@ -53,29 +55,40 @@ elif stepsize>0 and vmax>0:
 vend=vmax
 
 tg=TGraphErrors()
-tc=TCanvas("cgr")
 tg.SetTitle("Dark pulse rate vs Voltage;V;MHz")
+tga=TGraphErrors()
+tga.SetTitle("Afterpulse rate vs Voltage")
+tc=TCanvas("cgr","Pulse Data",1000,500)
+tc.Divide(2,1)
 
-print "nsteps",nsteps
+#print "nsteps",nsteps
+nbuf=args.nbuf
 
 for i in range(nsteps+1):
     v=round(voltage+i*stepsize,3)
     # set voltage
-    subprocess.call(["setVoltage.py","-pv"+str(v)])
+    subprocess.call(["setVoltage.py","-pqv"+str(v)])
     # takepulses
     filename=outname+"_"+str(v)+".root"
     print "Saving data to",filename
-    subprocess.call(["darkBuffers","-qb5", "-o"+filename])
+    subprocess.call(["darkBuffers","-qb"+str(nbuf), "-o"+filename])
     tf=TFile(filename)
     darkRate=tf.Get("hRate").GetBinContent(1);
     error=tf.Get("hRate").GetBinError(1);
     tg.SetPoint(tg.GetN(),v,darkRate);
     tg.SetPointError(tg.GetN()-1,0,error);
+    afterRate=tf.Get("hAp").GetBinContent(1);
+    error=tf.Get("hAp").GetBinError(1);
+    tga.SetPoint(tga.GetN(),v,afterRate);
+    tga.SetPointError(tga.GetN()-1,0,error);
+    tc.cd(1);
     tg.Draw("ALP*")
+    tc.cd(2)
+    tga.Draw("ALP*")
     tc.Update()
     
 subprocess.call(["setVoltage.py"])
-tg.Draw("ALP")
+
 time.sleep(2)
 tc.SaveAs(outname+".pdf")
 

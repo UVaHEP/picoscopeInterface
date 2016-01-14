@@ -8,7 +8,8 @@
 #include <TCanvas.h>
 #include <TStyle.h>
 #include <iostream>
-
+#include <getopt.h>
+#include <stdio.h>
 
 using namespace picoscope;
 
@@ -35,16 +36,64 @@ void setupPicoscope(ps5000a &dev, chRange range, int samples, int nbuffers) {
   dev.prepareBuffers();  
 }
 
+int main(int argc, char **argv) {
 
-void rootTest(){
   ps5000a dev;
-  //  dev.setCaptureCount(20);
-  const int samples = 100;  // number of ADC samples per waveform
-  const int NBUFFERS=10000; // number of waveforms per capture
-  const int NREPEAT=5;     // number of capture cycles
-  const int NSAVE=20;
   chRange range = PS_50MV;
-  setupPicoscope(dev, range, samples, NBUFFERS); 
+  int samples = 100;    // number of ADC samples per waveform
+  int nbuffers=10000;   // number of waveforms per capture cycle
+  int nrepeat=5;        // number of capture cycles
+  int nsave=20;         // number of waveforms to save for samples
+  int z0=0;              // starting point for background integral
+  int xlow=samples/2;   // starting point for pulse integral
+  int xwid=15;          // bins to integrate
+  int opt;
+  bool quit=false;
+  bool quiet=false;
+  TString outfn="pulsed.root";
+  
+  while ((opt = getopt(argc, argv, "b:c:S:n:o:hq0x:w:z:")) != -1) {
+    switch (opt) {
+    case 'b':
+      nbuffers=atoi(optarg);
+      break;
+    case 'c':
+      nrepeat=atoi(optarg);
+      break;
+    case 'S':
+      nsave=atoi(optarg);
+      break;
+    case 'o':
+      outfn = optarg;
+      std::cout<<"set outfn " << outfn<<std::endl;
+      break;
+    case 'z':
+      z0=atoi(optarg);
+      break;
+    case 'x':
+      xlow=atoi(optarg);
+      break;
+    case 'w':
+      xwid=atoi(optarg);
+      break;
+    case 'q':   // exit when finished
+      quit=true;
+      break;
+    case '0':   // turn off graphics
+      quiet=true;  
+      break;	
+    case 'h':
+    default: /* '?' */
+      fprintf(stderr, "Usage: %s",argv[0]);
+      fprintf(stderr, "-b nbuffers[10000] -c nrepeat[5] -w nsave[20] -o output[darkBuffers.root]\n");
+      fprintf(stderr, "-x starting bin of pulse integral[50]\n");
+      fprintf(stderr, "-q exit when finished\n");	    
+      exit(EXIT_FAILURE);
+    }
+  }
+  TApplication theApp("App", &argc, argv, 0, -1);
+  
+  setupPicoscope(dev, range, samples, nbuffers); 
 
 
   TH2F *hpersist=new TH2F("hpersist","Persistance Display",samples,
@@ -54,10 +103,10 @@ void rootTest(){
   TH1F* hpulses1=new TH1F("hpulses1","Pulse area distribution",200,-20000,200000);
   TH1F* hpulses0=new TH1F("hpulses0","Pulse area distribution",200,-20000,200000);
 
-  TH1F* waveForms[NSAVE];
+  TH1F* waveForms[nsave];
   int wavSaved=0;
   
-  for (int i = 0; i < NREPEAT; i++) {
+  for (int i = 0; i < nrepeat; i++) {
     std::cout << "Capturing Block:" << i << std::endl;     
     dev.captureBlock();
 
@@ -70,9 +119,9 @@ void rootTest(){
 	hsamp->SetBinContent(i, -1*waveform[i]);
       }
       hsum->Add(hsamp);
-      PHD(hsamp,hpulses1,50,65);
-      PHD(hsamp,hpulses0,0,15);
-      if (wavSaved<NSAVE) {
+      PHD(hsamp,hpulses1,xlow,xlow+xwid);
+      PHD(hsamp,hpulses0,z0,z0+xwid);
+      if (wavSaved<nsave) {
 	waveForms[wavSaved]=
 	  (TH1F*)hsamp->Clone(TString::Format("wave%02d",wavSaved));
 	wavSaved++;
@@ -82,16 +131,16 @@ void rootTest(){
   }
 
   dev.close(); 
-  TFile *f = new TFile("test.root", "RECREATE");
+  TFile *f = new TFile(outfn, "RECREATE");
   
-  TCanvas *tc=new TCanvas("tc","Pulse heights",1800,600);
+  TCanvas *tc=new TCanvas("tc","Pulse heights",1200,400);
   tc->Divide(3,1);
   gStyle->SetOptStat(0);
   
   // projections of persistance histogram to show counts vs threshold
   tc->cd(1)->SetLogy();
-  hpersist->ProjectionY("_py1",50,65)->DrawCopy();
-  hpersist->ProjectionY("_py0",0,15)->DrawCopy("same");
+  hpersist->ProjectionY("_py1",xlow,xlow+xwid)->DrawCopy();
+  hpersist->ProjectionY("_py0",z0,z0+xwid)->DrawCopy("same");
 
   // plot the persistance histogram
   tc->cd(2);
@@ -112,19 +161,12 @@ void rootTest(){
   hpulses1->Write(); 
 
   f->Close();
-}
-
-
-
-int main(int argc, char **argv) {
-  TApplication theApp("App", &argc, argv);
-  rootTest();
 
   std::cout << "Hit any ^c to exit" << std::endl;
   theApp.Run(true);
   
   return 0;
-
-
 }
+
+
 

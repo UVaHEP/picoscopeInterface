@@ -16,7 +16,10 @@ void DarkPeaker::SetBuffer(TH1F *newbuf, double sampleTime){
   buf=newbuf;
   dT=sampleTime;
   if (hbkg) delete hbkg;
-  //if (bkgCorrectedY) delete bkgCorrectedY;
+  if (bkgCorrectedY) {
+    delete bkgCorrectedY;
+    bkgCorrectedY=0;
+  }
   if (hdist) delete hdist;
   npeaks=0;
 }
@@ -62,7 +65,9 @@ int DarkPeaker::AnalyzePeaks(){
 
   // find peaks
   double threshold = (snglPeak/2) / buf->GetMaximum();
-  npeaks=tspectrum->Search(buf,2,"nobackground,nomarkov,nodraw",threshold);
+  //
+  double sigma=2; // this can/should be optimzed
+  npeaks=tspectrum->Search(buf,sigma,"nobackground,nomarkov,nodraw",threshold);
   //int npeaks=tspectrum->Search(buf,2,"nomarkov",threshold);
   cout << "Found " << npeaks << " peaks" << endl;
   cout << "Dark pulse rate: " << CalcDarkRate() << " MHz" << endl;
@@ -99,31 +104,69 @@ void DarkPeaker::FindBackground(){
 
 // find noise from distribution pulse height spectrum
 void DarkPeaker::FindNoise(){
+  // background subtracted sample data
   hdist=new TH1F("hdist","ADC distribution",
 		       100,-0.1*buf->GetMaximum(),buf->GetMaximum());
   for (int i = 1; i <= buf->GetNbinsX(); i++)
     hdist->Fill( buf->GetBinContent(i) - hbkg->GetBinContent(i)  );
 
-  int noiseX=hdist->GetMaximumBin();
-  double noiseY=hdist->GetBinContent(noiseX);
-  double r1=0,r2=0;  // range for fitting noise peak
-  for (int i=1; i<hdist->GetNbinsX(); i++){
-    if ( i<noiseX && hdist->GetBinContent(i) < noiseY*0.5 )
-      r1=hdist->GetBinLowEdge(i);
-    else if ( i>noiseX && hdist->GetBinContent(i) > noiseY*0.5 ){
-      r2=hdist->GetBinLowEdge(i+2);
+  double xmin=hdist->GetXaxis()->GetXmin();
+  double xmax=hdist->GetXaxis()->GetXmax();
+
+  TF1 *tf01 = new TF1("f01","gaus",xmin,xmax);
+
+  // fit the largest peak to estimate the noise width 
+  int noiseXbin=hdist->GetMaximumBin();
+  double noiseX=hdist->GetBinCenter(noiseXbin);
+  double noiseY=hdist->GetBinContent(noiseXbin);
+
+  // starting parameter for noise width
+  double binwid=hdist->GetBinWidth(noiseXbin);
+  double fwhm=binwid;
+  for (int i=noiseXbin-1; i>=0; i--){
+    if (hdist->GetBinContent(i)<=noiseY/2) {
+      fwhm=noiseX-hdist->GetBinCenter(i);
+      break;
     }
   }
-  hdist->Fit("gaus","0q","",r1,r2);
-  tfNoise=hdist->GetFunction("gaus");
-  tfNoise->SetRange(hdist->GetXaxis()->GetXmin(),hdist->GetXaxis()->GetXmax());
-  hdist->Add(tfNoise,-1);
-  snglPeak=hdist->GetMean();
-  hdist->Add(tfNoise);
+  tf01->SetParameters(noiseY,noiseX,fwhm);
+
+  // fit the noise
+  hdist->Fit("f01","0","",noiseX-fwhm,noiseX+fwhm);
+  double par[3];
+  tf01->GetParameters(par);
+
+  // use TSprectrum to find the 0,1 PE peaks
+  TSpectrum *ts2=new TSpectrum();
+  int npeaks=ts2->Search(hdist,par[2]/binwid,"nodraw");
+  if (npeaks<2) { // can't find 1PE peak
+    // place 1PE 6S.D. over noise, so we count 3S.D. fluctuations
+    //snglPeak=par[1]+6*par[2];
+    snglPeak=6*par[2];
+    std::cout <<
+      "1PE peak not found, estimate at noise+5 S.D. " <<
+      snglPeak << std::endl;
+  }
+  else { // use 1PE from TSpectrum
+    Int_t *index=new Int_t[npeaks];
+    Float_t *xpeaks= ts2->GetPositionX();
+    Float_t *ypeaks= ts2->GetPositionY();
+    TMath::Sort(npeaks, xpeaks, index, kFALSE);  // index sort by x
+    // not sure if absolute height is best or [height - mean noise]
+    // use height for now
+    snglPeak=xpeaks[index[1]]; 
+    //snglPeak=xpeaks[index[1]]-xpeaks[index[0]];
+    std::cout <<
+      "1PE estimated at " <<
+      snglPeak << std::endl;
+  }
+  delete ts2;
 }
 // dark count rate in MHz
 double DarkPeaker::CalcDarkRate(){
   if (buf) return npeaks / (dT*1e6*buf->GetNbinsX());
   return 0;
 }
+
+
 

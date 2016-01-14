@@ -44,11 +44,11 @@ int main(int argc, char **argv) {
       outfn = optarg;
       std::cout<<"set outfn " << outfn<<std::endl;
       break;
-    case 'q':
+    case 'q':   // exit when finished
       quit=true;
       break;
-    case '0':
-      quiet=true;
+    case '0':   // turn off graphics
+      quiet=true;  
       break;	
     case 'h':
     default: /* '?' */
@@ -112,21 +112,28 @@ int main(int argc, char **argv) {
   // delta time distribution
   TH1F *hdTime=new TH1F("hdTime","Delta times;x [2 ns]",101,-2.5,502.5);
   // pulse height distribution
-  TH1F* hpeaks=new TH1F("hpeaks","Peaks",100,0,15000);
-  TCanvas *tc=new TCanvas("tc","Samples",1800,600);
-  TCanvas *tc1=new TCanvas("tc1","Peaks and Time distribution",0,650,1800,600);
+  TH1F* hpeaks=new TH1F("hpeaks","Peaks",200,0,15000);
+  TCanvas *tc=new TCanvas("tc","Samples",50,20,1200,400);
+  TCanvas *tc1=new TCanvas("tc1","Peaks and Time distribution",0,450,1200,400);
   tc1->Divide(2,1);
   gStyle->SetOptStat(0);
   
   DarkPeaker *dPk = new DarkPeaker();
-  
+
+  bool first=false;
   for (auto &waveform : data) {
     hist = new TH1F("pulses", "pulses", waveform.size(), 0, waveform.size());
     for (int i = 0; i < waveform.size(); i++) {
       hist->SetBinContent(i, -1*waveform[i]);
-      
     }
-
+    if (first) {
+      int iymax=(int)hist->GetMaximum();
+      iymax=iymax*1.1;
+      iymax-=iymax%1000;
+      hpeaks->SetBins(200,0,iymax);
+      first=false;
+    }
+    
     dPk->SetBuffer(hist,timebase);
     dPk->AnalyzePeaks();
     
@@ -158,6 +165,8 @@ int main(int argc, char **argv) {
     hist->Write(); 
     delete hist; 
   }
+  hdTime->Write();
+  hpeaks->Write();
   fitExp(hdTime,"L");
   hdTime->DrawCopy();
   tc1->Update();
@@ -167,10 +176,42 @@ int main(int argc, char **argv) {
   double meanDt = -2/hdTime->GetFunction("expo")->GetParameter(1);  // Dt in [ns]
   double rate = 1 / meanDt * 1000;  // in MHz
   std::cout << "Average dark pulse rate: " << rate << std::endl;
+  double par[2];
+  TF1 *fcn=hdTime->GetFunction("expo");
+  fcn->GetParameters(par);
   hRate->SetBinContent(1,rate);
   hRate->SetBinError(1,rate*hdTime->GetFunction("expo")->GetParError(1)/
-		     hdTime->GetFunction("expo")->GetParameter(1));
+		     par[1]);
   hRate->Write();
+
+  // Find the afterpulsing rate
+  int maxbin=hdTime->GetMaximumBin();
+
+  // rough estimate of excess over exponential fit, can improve
+  double excess=0;
+  for (int i=maxbin; i<=hdTime->GetNbinsX(); i++){
+    double x=hdTime->GetBinCenter(i);
+    double y=hdTime->GetBinContent(i);
+    double ey=hdTime->GetBinError(i);
+    if ( (y-fcn->Eval(x)) < ey/2 ) break;
+    excess += y-fcn->Eval(x);
+  }
+  double arate=excess/hdTime->Integral();
+  /*
+  int xmax=hdTime->GetXaxis()->GetXmax();
+  int xmin=hdTime->GetBinLowEdge(maxbin);
+  double histInt=hdTime->Integral(maxbin,hdTime->GetNbinsX()) *
+    hdTime->GetBinWidth(maxbin);
+  double funcInt=exp(par[0])/par[1] * ( exp(par[1]*xmax) - 1 );
+  double arate = (histInt-funcInt)/funcInt;
+  */
+
+  std::cout << "After pulse rate: " << arate << std::endl;
+  TH1F *hAp=new TH1F("hAp","After Pulse Rate",1,-1,1);
+  hAp->SetBinContent(1,arate);
+  hAp->SetBinError(1,arate/sqrt(excess)); // rough estimate, can improve
+  hAp->Write();
+  
   f.Close(); 
   if (quit) return 0;
   theApp.Run(true);
