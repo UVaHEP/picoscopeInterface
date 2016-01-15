@@ -1,5 +1,7 @@
 #include "utils.h"
 #include "TMath.h"
+#include <stdlib.h>
+#include <pthread.h>
 #include <iostream>
 
 using std::cout;
@@ -20,7 +22,10 @@ void DarkPeaker::SetBuffer(TH1F *newbuf, double sampleTime){
     delete bkgCorrectedY;
     bkgCorrectedY=0;
   }
-  if (hdist) delete hdist;
+  if (hdist) {
+    delete hdist;
+    hdist=0;
+  }
   npeaks=0;
 }
 int DarkPeaker::GetNPeaks(){return npeaks;}
@@ -68,7 +73,8 @@ int DarkPeaker::AnalyzePeaks(){
   //
   double sigma=2; // this can/should be optimzed
   npeaks=tspectrum->Search(buf,sigma,"nobackground,nomarkov,nodraw",threshold);
-  //int npeaks=tspectrum->Search(buf,2,"nomarkov",threshold);
+  //npeaks=tspectrum->Search(buf,sigma,"nomarkov,nodraw",threshold);
+  //int npeaks=tspectrum->Search(buf,sigma,"nomarkov",threshold);
   cout << "Found " << npeaks << " peaks" << endl;
   cout << "Dark pulse rate: " << CalcDarkRate() << " MHz" << endl;
   return 0;
@@ -144,7 +150,7 @@ void DarkPeaker::FindNoise(){
     //snglPeak=par[1]+6*par[2];
     snglPeak=6*par[2];
     std::cout <<
-      "1PE peak not found, estimate at noise+5 S.D. " <<
+      "1PE peak not found, estimate at noise+6 S.D. " <<
       snglPeak << std::endl;
   }
   else { // use 1PE from TSpectrum
@@ -170,3 +176,21 @@ double DarkPeaker::CalcDarkRate(){
 
 
 
+TString getoutput(TString cmd)
+{
+  // setup
+  int MAX_BUFFER=5000;
+  TString data;
+  FILE *stream;
+  char buffer[MAX_BUFFER];
+
+  // do it
+  stream = popen(cmd.Data(), "r");  // or c_str() for C++ string
+  while ( fgets(buffer, MAX_BUFFER, stream) != NULL )
+    data.Append(buffer);
+  pclose(stream);
+
+  // exit
+  // return trim(data);
+  return data;
+}

@@ -121,7 +121,10 @@ int main(int argc, char **argv) {
   DarkPeaker *dPk = new DarkPeaker();
 
   bool first=false;
+  int nbuf=0;
   for (auto &waveform : data) {
+    nbuf++;
+    std::cout << "Processing buffer: " << nbuf << std::endl;
     hist = new TH1F("pulses", "pulses", waveform.size(), 0, waveform.size());
     for (int i = 0; i < waveform.size(); i++) {
       hist->SetBinContent(i, -1*waveform[i]);
@@ -151,7 +154,10 @@ int main(int argc, char **argv) {
     // draw samples buffer with peaks and background
     tc->cd();
     hist->DrawCopy();
-    dPk->GetBackground()->Draw("same");
+    TH1F* bkg=dPk->GetBackground();
+    bkg->SetLineColor(kGreen+2);
+    bkg->SetLineWidth(3);
+    bkg->Draw("same");
     tc->Update();
 
     // draw pulse analysis plots
@@ -163,7 +169,7 @@ int main(int argc, char **argv) {
     tc1->Update();
 
     hist->Write(); 
-    delete hist; 
+    delete hist;
   }
   hdTime->Write();
   hpeaks->Write();
@@ -205,15 +211,21 @@ int main(int argc, char **argv) {
   double funcInt=exp(par[0])/par[1] * ( exp(par[1]*xmax) - 1 );
   double arate = (histInt-funcInt)/funcInt;
   */
-
-  std::cout << "After pulse rate: " << arate << std::endl;
+  
   TH1F *hAp=new TH1F("hAp","After Pulse Rate",1,-1,1);
   hAp->SetBinContent(1,arate);
   hAp->SetBinError(1,arate/sqrt(excess)); // rough estimate, can improve
   hAp->Write();
   
-  f.Close(); 
+  f.Close();
+
+  std::cout << "===============================" << std::endl;
+  std::cout << "Fit dark pulse rate: " << rate << std::endl;
+  std::cout << "After pulse rate: " << arate << std::endl;
+  std::cout << "===============================" << std::endl;
+  
   if (quit) return 0;
+  std::cout << "Hit any ^c to exit" << std::endl;
   theApp.Run(true);
   return 0;
 

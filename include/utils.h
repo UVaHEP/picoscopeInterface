@@ -4,6 +4,7 @@
 #include "TH1F.h"
 #include "TF1.h"
 #include "TSpectrum.h"
+#include "TString.h"
 
 
 class DarkPeaker {
@@ -33,6 +34,9 @@ private:
   Float_t *deltaX;
   double dT;
 };
+
+
+TString getoutput(TString cmd);
 
 
 #endif
