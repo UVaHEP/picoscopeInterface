@@ -3,6 +3,18 @@
 import argparse,sys
 import subprocess,time
 
+
+class bcolors:
+    HEADER = '\033[95m' # purple
+    INFO = '\033[94m'  #blue
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
 #######################
 # main
 #######################
@@ -66,6 +78,7 @@ nbuf=args.nbuf
 
 for i in range(nsteps+1):
     v=round(voltage+i*stepsize,3)
+    print bcolors.HEADER+"\nStarting data at V= "+str(v)+bcolors.ENDC
     # set voltage
     subprocess.call(["setVoltage.py","-pqv"+str(v)])
     # takepulses
