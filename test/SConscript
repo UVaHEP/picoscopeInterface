@@ -13,32 +13,20 @@ Import('env')
 rpathLib = Dir('#/lib')
 env['RPATH'] = str(rpathLib)
 print env['RPATH']
+
 #env.Append(LIBPATH=['#/lib', gmockLibDir, gTestLibDir])
-env.Append(LIBPATH=['#/lib'])
 #env['CPPPATH'].append(gmockIncDir)
 #env['CPPPATH'].append(gTestIncDir)
+
+env.Append(LIBPATH=['#/lib'])
+
+
 env['CPPPATH'].append('/usr/include/python2.7')
-#env.Append(LIBS=['libpicoscopeInterface', 'ps6404', 'gmock', 'gtest', 'python2.7', 'boost_python', 'ps5444b', 'ps5000a'])
+
 env.Append(LIBS=['libpicoscopeInterface', 'ps6404', 'python2.7', 'ps5444b', 'ps5000a'])
 
 interfaceLib = File('#/lib/libpicoscopeInterface.so')
 #env.Program('interfaceTest', ['interfaceTest.cc', 'testRunner.cc'])
 #test5000a = env.Program('test5000a', ['test5000a.cc', 'testRunner.cc'])
-benv = Environment(CCFLAGS='-std=c++11', CPPPATH=[include, picoscopeInclude, '/usr/include/python2.7'], LIBPATH=['/opt/picoscope/lib', './lib'])
 
-Rootenv = Environment(CCFLAGS='-std=c++11 -ggdb', CPPPATH=[include, picoscopeInclude, '/usr/include/python2.7'], LIBPATH=['/opt/picoscope/lib', '#/lib'])
-Rootenv.ParseConfig("root-config --cflags --libs")
-Rootenv.Append(LIBS=['picoscopeInterface', 'ps5000a', 'ps5444b', 'ps6000', 'Spectrum','utils'])
-#Rootenv.Append(RPATH = '/home/hurt/ProgrammingProjects/picoscopeInterface/lib')
-Rootenv['RPATH'] = str(rpathLib)
-print Rootenv['RPATH']
-
-#junkTest = benv.Program('junkTest', ['junktest.cc'])
-#test6000 = env.Program('test6000', ['test6000.cc'])
-#findMaxADC = env.Program('findMaxADC', ['findMaxADCs.cc'])
-#root5000 = Rootenv.Program('root5000', ['root5000.cc'])
-#root5000 = Rootenv.Program('rootTest', ['rootTest.cc'])
-root5000 = Rootenv.Program('darkBuffers', ['darkBuffers.cc'])
-root5000 = Rootenv.Program('pulseMeasurements', ['pulseMeasurements.cc'])
-#pythonTest = env.SharedLibrary('PicoscopeTest', ['boostPython.cc'])
 
