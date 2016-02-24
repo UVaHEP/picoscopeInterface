@@ -18,10 +18,13 @@ psInterface = env.SharedLibrary('picoscopeInterface', ['picoscopeInterface.cc'])
 ps6000Interface = env.SharedLibrary('ps6404', ['ps6000.cc' ])
 ps5000aInterface = env.SharedLibrary('ps5444b', ['ps5000a.cc'])
 env.Alias('install','/opt/uvahep')
-env.Install('/opt/uvahep/lib', [ps6000Interface, ps5000aInterface, psInterface])
-env.Install('/opt/uvahep/include', ['#/include/picoscopeInterface.h','#/include/ps5000a.h', '#/include/ps6000.h'])
 
-
-#psInstInterface = env.Install('#/lib', [psInterface])
-#env.Install('#/lib', ps6000Interface)
-#env.Install('#/lib', ps5000aInterface)
+if 'install' in COMMAND_LINE_TARGETS:
+    if not os.path.exists('/opt/uvahep'):
+        Execute(Mkdir('/opt/uvahep'))
+    env.Install('/opt/uvahep/lib', [ps6000Interface, ps5000aInterface, psInterface])
+    env.Install('/opt/uvahep/include', ['#/include/picoscopeInterface.h','#/include/ps5000a.h', '#/include/ps6000.h'])
+else:
+    psInstInterface = env.Install('#/lib', [psInterface])
+    env.Install('#/lib', ps6000Interface)
+    env.Install('#/lib', ps5000aInterface)
