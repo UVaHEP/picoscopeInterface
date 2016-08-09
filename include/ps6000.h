@@ -2,7 +2,7 @@
 #define _PS6000_H
 
 #include <string>
-
+#include <vector>
 
 #include "picoscopeInterface.h"
 #include <libps6000-1.4/ps6000Api.h>
@@ -11,7 +11,7 @@
 #endif
 
 using std::string; 
-
+using std::vector; 
 namespace picoscope {
   //Note: Adding a bool for chRes 6404 even though its not used to
   //keep the sizes of the tuple the same
@@ -24,7 +24,7 @@ namespace picoscope {
     map<chBandwidth, PS6000_BANDWIDTH_LIMITER> chBwMap;
     map<chCoupling, PS6000_COUPLING> chCouplingMap;
     map<chRange, PS6000_RANGE> chRangeMap; 
-
+    map<triggerDirection, PS6000_THRESHOLD_DIRECTION> triggerDirectionMap; 
     
     public: 
     ps6000();
@@ -54,7 +54,16 @@ namespace picoscope {
     //    void resetChannel(chName name);
     //    void setChRange(chName name, chRange range); 
 
+
+    bool verifyStatus(PICO_STATUS status); 
+
+    //Block capture Functions
+    void captureBlocks(unsigned int count, unsigned int samples = 0);
+    bool checkBlockLimit(unsigned int count, unsigned int samples); 
+    
     //Trigger Functions
+    void setSimpleTrigger(chName n, short Threshold, triggerDirection direction, unsigned long delay, short autoTrigger);
+    
     void setTriggerChannel(chName name);
     void setTriggerLevel(short adcCount);
     void setTriggerDelay(unsigned long delay);
@@ -68,7 +77,8 @@ namespace picoscope {
     void setTimebaseNS(float interval); 
     void setPreTriggerSamples(unsigned int samples); 
     void setPostTriggerSamples(unsigned int samples); 
-
+    void setSamples(unsigned int samples);
+    
     bool oversample(); 
     unsigned long maxSamples(); 
     unsigned long timebase(); 
@@ -77,8 +87,19 @@ namespace picoscope {
     void setSegment(unsigned long segment); 
     unsigned long segment();
 
+    void captureBlock();
+    float adcToMv(float raw, chRange range);
+    bool prepareBuffers();
+
+    vector< vector<short> > &getWaveforms();
+    void setCaptureCount(unsigned int caps); 
+    
+    static void callBack(short handle, PICO_STATUS status, void *pParam);
+
     
   private:
+    vector< vector< short> > waveforms; 
+    bool *ready; 
 
 
 

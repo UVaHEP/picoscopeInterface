@@ -43,7 +43,8 @@ namespace picoscope {
     B,
     C,
     D,
-    EXT
+    EXT,
+    AUX
   }; 
 
 
@@ -183,7 +184,6 @@ namespace picoscope {
     devResolution _resolution;
     unsigned int _captures;
 
-    
     unsigned int _preTriggerSamples;
     unsigned int _postTriggerSamples;
     unsigned int _nsamples; 

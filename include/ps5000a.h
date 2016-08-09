@@ -40,7 +40,12 @@ namespace picoscope {
     void setDeviceResolution(devResolution r); 
 
     nativeChannel convertChannel(chName name); 
-        
+
+    //Block capturing Functions
+    void captureBlocks(unsigned int count, unsigned int samples = 0);
+    
+
+    
     //Trigger Functions
     void setTriggerChannel(chName name);
     void setTriggerLevel(short adcCount);
@@ -65,6 +70,9 @@ namespace picoscope {
     void setCaptureCount(unsigned int caps); 
     void setSimpleTrigger(chName n, short Threshold, triggerDirection direction, unsigned long delay, short autoTrigger); 
 
+    short getMinADC(); 
+    short getMaxADC();
+    
     
     void setSegment(unsigned long segment); 
     unsigned long segment();

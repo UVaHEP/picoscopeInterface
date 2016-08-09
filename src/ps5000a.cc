@@ -10,6 +10,7 @@ namespace picoscope {
 
   
   ps5000a::ps5000a() {
+
     std::cout << "ps5000a!" << std::endl;
     _handle = 0;
     _serial = 0;
@@ -311,6 +312,25 @@ namespace picoscope {
   }
   
 
+  /*/These could get rolled into one function using an enum or bool to select
+  the value to get.
+  For now I have them seperate since I find that a bit easier to use. */
+  short ps5000a::getMinADC() {
+    short min;
+    auto status = ps5000aMinimumValue(_handle, &min);
+    return min; 
+
+  }
+  short ps5000a::getMaxADC() {
+
+    short max;
+    auto status = ps5000aMaximumValue(_handle, &max);
+    return max; 
+
+  }
+    
+
+  
   //convenience forwarder
   float ps5000a::calculateTimebase(unsigned int timebase, devResolution r)
   {
@@ -398,6 +418,14 @@ namespace picoscope {
 
   }
 
+
+  void ps5000a::captureBlocks(unsigned int count, unsigned int samples) {
+
+
+
+
+  }
+  
   void ps5000a::captureBlock() {
 
     int32_t timeIndisposed = 0;
