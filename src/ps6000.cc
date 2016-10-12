@@ -377,7 +377,7 @@ namespace picoscope {
 
     //Set Data Buffers
     for (int i = 0; i < _captures; i++) {
-      status = ps6000SetDataBuffer(_handle, PS6000_CHANNEL_A, waveforms[i].data(), _nsamples, PS6000_RATIO_MODE_NONE);
+      status = ps6000SetDataBufferBulk(_handle, PS6000_CHANNEL_A, waveforms[i].data(), _nsamples, i, PS6000_RATIO_MODE_NONE);
       if (status != PICO_OK)
 	std::cout << "Error setting data buffer:" << status << std::endl; 
     }
