@@ -1,5 +1,6 @@
 #include "ps6000.h"
 
+#include <cmath>
 using std::get;
 
 namespace picoscope {
@@ -237,7 +238,13 @@ namespace picoscope {
   }
   
   float ps6000::timebaseNS() {
-    
+    unsigned long timebaseL, timebaseH;
+    timebaseH = 156250000;
+    timebaseL = 5000000000;
+    if (_timebase <= 4)
+      return exp2f(_timebase) / timebaseL;
+    else
+      return (_timebase-4) / timebaseH; 
   }
 
   
