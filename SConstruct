@@ -8,7 +8,7 @@ env = Environment(LIBS=['ps6000'], CCFLAGS='-std=c++11 -Wl,rpath=./', CPPPATH=[i
 Export('env')
 
 SConscript(['src/SConscript'])
-SConscript(['test/SConscript'])
+#SConscript(['test/SConscript'])
 
 
 

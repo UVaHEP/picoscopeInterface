@@ -84,6 +84,9 @@ namespace picoscope {
     unsigned long timebase(); 
     float timebaseNS(); 
 
+    short getMinADC(); 
+    short getMaxADC();
+
     void setSegment(unsigned long segment); 
     unsigned long segment();
 

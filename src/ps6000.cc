@@ -228,6 +228,16 @@ namespace picoscope {
   bool ps6000::oversample() {
 
   }
+
+  short ps6000::getMinADC() {
+
+    return PS6000_MIN_VALUE;
+  }
+  short ps6000::getMaxADC() {
+
+    return PS6000_MAX_VALUE;
+  }
+
   
   unsigned long ps6000::maxSamples() {
     return _maxSamples; 
