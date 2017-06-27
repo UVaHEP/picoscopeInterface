@@ -143,6 +143,8 @@ namespace picoscope {
     virtual void resetChannel(chName name);
     virtual void setChRange(chName name, chRange range);
     virtual void setBandwidthFilter(chName name, chBandwidth bw); 
+    virtual Channel getChannel(chName name);
+
     
     //Trigger Functions
     virtual void setTriggerChannel(chName name);

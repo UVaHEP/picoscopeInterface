@@ -84,7 +84,10 @@ namespace picoscope {
     std::get<aoffset>(channels[name]) = offset;
     psUpdate(); 
   }
-  
+  Channel picoscopeBase::getChannel(chName name) {
+    return channels[name];
+  }
+    
   void picoscopeBase::resetChannel(chName name) {
     std::cout << "Resetting Channel" << std::endl;
   }

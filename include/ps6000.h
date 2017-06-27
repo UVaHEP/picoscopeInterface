@@ -91,6 +91,7 @@ namespace picoscope {
     unsigned long segment();
 
     void captureBlock();
+    float mVToADC(float mv, chRange range);
     float adcToMv(float raw, chRange range);
     bool prepareBuffers();
 

@@ -424,6 +424,48 @@ namespace picoscope {
 
   }
 
+  float ps6000::mVToADC(float mv, chRange range) {
+    float max = _maxADCValue;
+    float r = 0;
+    switch (chRangeMap[range]) {
+    case PS6000_50MV:
+      r = 50.0; 
+      break; 
+    case PS6000_100MV:
+      r = 100.0; 
+      break; 
+    case PS6000_200MV:
+      r = 200.0; 
+      break; 
+    case PS6000_500MV:
+      r = 500.0; 
+      break; 
+    case PS6000_1V:
+      r = 1000.0; 
+      break; 
+    case PS6000_2V:
+      r = 2000.0; 
+      break; 
+    case  PS6000_5V:
+      r = 5000.0; 
+      break; 
+    case  PS6000_10V:
+      r = 10000.0; 
+      break; 
+    case PS6000_20V:
+      r = 20000.0;
+      break; 
+    case  PS6000_50V:
+      r = 50000.0; 
+      break; 
+    default:
+      r = 50.0; 
+      break; 
+    }
+
+    return (mv*max)/r;
+  }
+  
   float ps6000::adcToMv(float raw, chRange range) {
     float max = _maxADCValue; 
     float r = 0; 
