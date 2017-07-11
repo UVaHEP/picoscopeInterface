@@ -27,5 +27,6 @@ env.Append(LIBS=['libpicoscopeInterface', 'ps6404', 'ps6000', 'gmock', 'pthread'
 
 interfaceLib = File('#/lib/libpicoscopeInterface.so')
 
-test6000 = env.Program('test6000', ['test6000.cc', 'testRunner.cc'])
+#test6000 = env.Program('test6000', ['test6000.cc', 'testRunner.cc'])
+testGeneric = env.Program('testGeneric', ['testGeneric.cc'])  
 

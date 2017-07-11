@@ -15,11 +15,14 @@ using std::vector;
 namespace picoscope {
   //Note: Adding a bool for chRes 6404 even though its not used to
   //keep the sizes of the tuple the same
-  typedef tuple<PS6000_CHANNEL, PS6000_BANDWIDTH_LIMITER, PS6000_COUPLING, PS6000_RANGE, float, bool> nativeChannel;
+
 
 
   class ps6000 : public picoscopeBase {
 
+    typedef tuple<PS6000_CHANNEL, PS6000_BANDWIDTH_LIMITER, PS6000_COUPLING, PS6000_RANGE, float, bool> nativeChannel;
+
+    
     map<chName, PS6000_CHANNEL> chNameMap; 
     map<chBandwidth, PS6000_BANDWIDTH_LIMITER> chBwMap;
     map<chCoupling, PS6000_COUPLING> chCouplingMap;
@@ -95,14 +98,14 @@ namespace picoscope {
     float adcToMv(float raw, chRange range);
     bool prepareBuffers();
 
-    vector< vector<short> > &getWaveforms();
+
     void setCaptureCount(unsigned int caps); 
     
     static void callBack(short handle, PICO_STATUS status, void *pParam);
 
-    
+    chRange autoRange(int nbufs);     
   private:
-    vector< vector< short> > waveforms; 
+
     bool *ready; 
 
 

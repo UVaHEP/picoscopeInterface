@@ -5,12 +5,13 @@
 #include <string> 
 #include <functional>
 #include <map>
+#include <vector>
 
 using std::tuple;
 using std::map; 
 using std::string; 
 using std::cout; 
-
+using std::vector;
 
 
 namespace picoscope { 
@@ -72,6 +73,12 @@ namespace picoscope {
     PS_16BIT
   }; 
 
+  enum Model {
+    PS_5000A,
+    PS_6000,
+    PS_UNSUPPORTED
+  };
+  
   enum timebases {
 
 
@@ -171,12 +178,20 @@ namespace picoscope {
     virtual float timebaseNS(); 
     virtual float calculateTimebase(unsigned int timebase, devResolution r); 
 
+    virtual bool prepareBuffers() { return false; };
+
+    virtual void captureBlock() {};
+
+    
     virtual void setSegment(unsigned long segment); 
     virtual unsigned long segment();
     virtual void setCaptureCount(unsigned int caps); 
     virtual unsigned int getCaptureCount();
 
+    virtual chRange autoRange(int nbufs); 
+    virtual Model model() { return _model; };
     
+    vector< vector<short> > &getWaveforms() { return waveforms; }; 
     protected:
     int8_t _serial; 
     int16_t _handle;
@@ -193,10 +208,10 @@ namespace picoscope {
     unsigned long _maxSamples; 
     unsigned long _timebase; 
     ChannelList channels; 
-
+    Model _model;
     
-  private:
-
+  protected:
+    vector< vector< short> > waveforms; 
 
   }; 
 

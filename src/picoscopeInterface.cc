@@ -134,6 +134,11 @@ std::cout << "Not implemented." << std::endl; };
   int32_t picoscopeBase::maxAdcValue(devResolution r) {
     return _maxADCValue;
   }
+
+
+  chRange picoscopeBase::autoRange(int nbufs) {
+    return PS_50MV;
+  }
   
 }
 

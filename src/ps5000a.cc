@@ -11,7 +11,6 @@ namespace picoscope {
   
   ps5000a::ps5000a() {
 
-    std::cout << "ps5000a!" << std::endl;
     _handle = 0;
     _serial = 0;
     _opened = false;
@@ -21,7 +20,8 @@ namespace picoscope {
     _nsamples = 200; 
     _timebase = 2; 
     _resolution = PS_8BIT;
-
+    _model = PS_5000A;
+    
     chNameMap.emplace(A, PS5000A_CHANNEL_A);
     chNameMap.emplace(B, PS5000A_CHANNEL_B);
     chNameMap.emplace(C, PS5000A_CHANNEL_C);
@@ -154,8 +154,8 @@ namespace picoscope {
 
   }
 
-  nativeChannel ps5000a::convertChannel(chName name) {
-    nativeChannel ch;
+  ps5000a::nativeChannel ps5000a::convertChannel(chName name) {
+    ps5000a::nativeChannel ch;
     Channel c = channels[name];
     get<aname>(ch) = chNameMap[name];
     get<abandwidth>(ch) = chBwMap[get<abandwidth>(c)];
@@ -480,11 +480,6 @@ namespace picoscope {
 
   }
 
-  vector< vector<short> > & ps5000a::getWaveforms() {
-
-    return waveforms; 
-
-  }
 
 
   int32_t ps5000a::maxADCValue(devResolution r) {
@@ -511,6 +506,34 @@ namespace picoscope {
     return max; 
 
   }
+
+  chRange ps5000a::autoRange(int nbufs) {
+    int mvRange[]={10,20,50,100,200,500,1000,2000,5000};
+    setChRange(picoscope::A, PS_10MV);
+    setCaptureCount(nbufs);
+    chRange autoRange=PS_10MV;
+    int mvScale=0;
+    for ( int psRange=PS_10MV; psRange <= PS_5V; psRange++ ){
+      std::cout<<"Autoranging pass: " << mvRange[psRange] << "mV range" << std::endl;
+      autoRange=(chRange)(psRange);
+      mvScale=mvRange[psRange];
+      setChRange(picoscope::A, autoRange);
+      prepareBuffers();
+      captureBlock();
+      bool overThresh=false;
+      for (auto &waveform : waveforms) {
+	for (int i = 0; i < waveform.size(); i++) {
+	  if (std::abs(waveform[i])>26000){      // ~ 80% of ADC range
+	    overThresh=true;
+	    break;
+	  }
+	}
+      } // end of buffer loop
+      if (!overThresh) return autoRange;  // CLEAN ME UP!
+    }
+    return autoRange;
+  }
+
   
 }
 

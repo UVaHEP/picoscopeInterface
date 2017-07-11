@@ -16,12 +16,12 @@ using std::vector;
 
 namespace picoscope {
 
-  typedef tuple<PS5000A_CHANNEL, PS5000A_BANDWIDTH_LIMITER, PS5000A_COUPLING, PS5000A_RANGE, float, bool> nativeChannel;
+  
 
 
   class ps5000a : public picoscopeBase {
 
-
+    typedef tuple<PS5000A_CHANNEL, PS5000A_BANDWIDTH_LIMITER, PS5000A_COUPLING, PS5000A_RANGE, float, bool> nativeChannel;
     
     map<chName, PS5000A_CHANNEL> chNameMap; 
     map<chBandwidth, PS5000A_BANDWIDTH_LIMITER> chBwMap;
@@ -77,14 +77,16 @@ namespace picoscope {
     void setSegment(unsigned long segment); 
     unsigned long segment();
     bool prepareBuffers(); 
-    vector< vector<short> > &getWaveforms();
+
     void captureBlock();
     float adcToMv(float raw, chRange range);
     int32_t maxADCValue(devResolution r);
     static void callBack(short handle, PICO_STATUS status, void *pParam);
 
+    chRange autoRange(int nbufs); 
+
+    
   private:
-    vector< vector< short> > waveforms; 
     bool *ready; 
 
     

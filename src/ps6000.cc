@@ -10,12 +10,13 @@ namespace picoscope {
 
   
   ps6000::ps6000() {
-    std::cout << "ps6000!" << std::endl;
     _handle = 0;
     _serial = 0;
     _opened = false;
     _update = true;
+    _model = PS_6000;
 
+    
     chNameMap.emplace(A, PS6000_CHANNEL_A);
     chNameMap.emplace(B, PS6000_CHANNEL_B);
     chNameMap.emplace(C, PS6000_CHANNEL_C);
@@ -135,8 +136,8 @@ namespace picoscope {
 
   }
 
-  nativeChannel ps6000::convertChannel(chName name) {
-    nativeChannel ch;
+  ps6000::nativeChannel ps6000::convertChannel(chName name) {
+    ps6000::nativeChannel ch;
     Channel c = channels[name];
     get<aname>(ch) = chNameMap[name];
     get<abandwidth>(ch) = chBwMap[get<abandwidth>(c)];
@@ -368,6 +369,7 @@ namespace picoscope {
   }
   
   void ps6000::captureBlock() {
+
     int32_t timeIndisposed = 0;
     void *p = this; 
     auto status = ps6000RunBlock(
@@ -549,10 +551,32 @@ namespace picoscope {
   }
 
 
-  vector< vector<short> > & ps6000::getWaveforms() {
-
-    return waveforms; 
-
+  chRange ps6000::autoRange(int nbufs) {
+    std::cout << "Model:" << _model << std::endl; 
+    int mvRange[]={10,20,50,100,200,500,1000,2000,5000};
+    setChRange(picoscope::A, PS_50MV);
+    setCaptureCount(nbufs);
+    chRange autoRange=PS_50MV;
+    int mvScale=0;
+    for ( int psRange=PS_50MV; psRange <= PS_5V; psRange++ ){
+      std::cout<<"Autoranging pass: " << mvRange[psRange] << "mV range" << std::endl;
+      autoRange=(chRange)(psRange);
+      mvScale=mvRange[psRange];
+      setChRange(picoscope::A, autoRange);
+      prepareBuffers();
+      captureBlock();
+      bool overThresh=false;
+      for (auto &waveform : waveforms) {
+	for (int i = 0; i < waveform.size(); i++) {
+	  if (std::abs(waveform[i])>26000){      // ~ 80% of ADC range
+	    overThresh=true;
+	    break;
+	  }
+	}
+      } // end of buffer loop
+      if (!overThresh) return autoRange;  // CLEAN ME UP!
+    }
+    return autoRange;
   }
 
   
