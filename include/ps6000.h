@@ -28,7 +28,7 @@ namespace picoscope {
     map<chCoupling, PS6000_COUPLING> chCouplingMap;
     map<chRange, PS6000_RANGE> chRangeMap; 
     map<triggerDirection, PS6000_THRESHOLD_DIRECTION> triggerDirectionMap; 
-    
+    map<chName, vector< waveform > > chWaveformMap; 
     public: 
     ps6000();
     ~ps6000() {};
@@ -94,11 +94,14 @@ namespace picoscope {
     unsigned long segment();
 
     void captureBlock();
+    void captureMultiBlock();
     float mVToADC(float mv, chRange range);
     float adcToMv(float raw, chRange range);
     bool prepareBuffers();
-
-
+    void prepareChBuffers(); 
+    vector <waveform> &chWaveforms(chName name) { return chWaveformMap[name]; }; 
+    
+    
     void setCaptureCount(unsigned int caps); 
     
     static void callBack(short handle, PICO_STATUS status, void *pParam);

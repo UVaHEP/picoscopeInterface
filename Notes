@@ -1,1 +1,16 @@
 "Multi" Branch, experimental work for enabling multiple channels and making things asynchronous  
+
+
+
+Typical Run:
+
+
+create a ps object
+enable channels, set timebase, set channels, set trigger, set samples
+prepare buffers, capture block
+
+
+
+Bug List:
+
+Bug in setting samples with pre/post samples 

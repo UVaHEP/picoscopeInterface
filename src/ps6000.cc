@@ -15,7 +15,7 @@ namespace picoscope {
     _opened = false;
     _update = true;
     _model = PS_6000;
-
+    _nsamples = 0; 
     
     chNameMap.emplace(A, PS6000_CHANNEL_A);
     chNameMap.emplace(B, PS6000_CHANNEL_B);
@@ -51,7 +51,10 @@ namespace picoscope {
     triggerDirectionMap.emplace(trgBelow, PS6000_BELOW);
     triggerDirectionMap.emplace(trgNone, PS6000_NONE); 
     
-
+    chWaveformMap.emplace(A, vector<waveform>());
+    chWaveformMap.emplace(B, vector<waveform>());
+    chWaveformMap.emplace(C, vector<waveform>());
+    chWaveformMap.emplace(D, vector<waveform>()); 
 
 
   }
@@ -294,6 +297,56 @@ namespace picoscope {
     return true; 
 
   }
+
+
+
+  void ps6000::captureMultiBlock() {
+
+    int32_t timeIndisposed = 0;
+    auto status = ps6000RunBlock(
+				 _handle,
+				 _preTriggerSamples,
+				 _postTriggerSamples,
+				 _timebase,
+				 0,
+				 &timeIndisposed,
+				 0,
+				 nullptr,
+				 nullptr); 
+    
+    short ready = 0;
+    ps6000IsReady(_handle, &ready); 
+    while (ready == 0) {
+      ps6000IsReady(_handle, &ready);
+    }
+    std::cout << "Post Run Block" << std::endl;
+
+    for (auto ch : channels) {
+      chName name = get<0>(ch);
+      Channel &c = get<1>(ch); 
+      bool  enabled = get<aenabled>(c); 
+      if (enabled) {
+	std::vector<waveform> &waves = chWaveformMap[name];
+	int i = 0; 
+	for (auto &wave : waves) {
+	  ps6000SetDataBufferBulk(_handle, chNameMap[name],
+			      wave.samples().data(),
+			      _nsamples,
+			      i,
+			      PS6000_RATIO_MODE_NONE);
+
+	  i++; 
+	}
+      }
+
+
+    }
+  
+  uint32_t samplesCaptured = _nsamples;
+  std::vector<int16_t> *overflow  = new std::vector<int16_t>(_captures*2);
+  ps6000GetValuesBulk(_handle, &samplesCaptured,0,_captures-1, 1, PS6000_RATIO_MODE_NONE, overflow->data());
+
+  }
   
   void ps6000::captureBlocks(unsigned int count, unsigned int samples) {
     int32_t timeIndisposed = 0;
@@ -414,7 +467,41 @@ namespace picoscope {
 
   }
 
+
+
+  void ps6000::prepareChBuffers() {
+    bool enabled;
+    PICO_STATUS status; 
+    for (auto ch : channels) {
+      chName name = get<0>(ch);
+      Channel &c = get<1>(ch); 
+      bool  enabled = get<aenabled>(c); 
+      if (enabled) {
+	std::cout << "Setting buffers for Channel " << name << "." << std::endl;
+	std::cout << "Using " << _captures << " captures." << std::endl;
+	std::cout << "With " << _nsamples << " samples each." << std::endl; 
+	//	waveform wave;
+	//	wave.set(name, get<acoupling>(c), get<abandwidth>(c), get<arange>(c),
+	//	 timebaseNS());
+	//	wave.setSamples(_nsamples);
+	//chWaveformMap[name].resize(_captures, wave);
+	for (int i = 0; i < _captures; i++) {
+
+	  chWaveformMap[name].emplace_back(name, get<acoupling>(c), get<abandwidth>(c),
+					   get<arange>(c), timebaseNS(), _nsamples); 
+	}
+
+      }
+    }
+  }
+
+
+  
+  
   bool ps6000::prepareBuffers() {
+
+    // Old style preparing of buffers, will use both temporarily
+    
     waveforms.resize(_captures);
     for (auto &i : waveforms) {
       i.resize(_nsamples);

@@ -6,87 +6,94 @@
 #include <functional>
 #include <map>
 #include <vector>
+#include <memory>
+
+#include "enums.h"
+#include "waveform.h"
 
 using std::tuple;
 using std::map; 
 using std::string; 
 using std::cout; 
 using std::vector;
-
+using std::shared_ptr; 
 
 namespace picoscope { 
 
 
-  enum accessors {
-    aname = 0,
-    abandwidth = 1,
-    acoupling = 2,
-    arange = 3,
-    aoffset = 4,
-    aenabled = 5
-  }; 
+  /* enum accessors { */
+  /*   aname = 0, */
+  /*   abandwidth = 1, */
+  /*   acoupling = 2, */
+  /*   arange = 3, */
+  /*   aoffset = 4, */
+  /*   aenabled = 5 */
+  /* };  */
 
-  enum chBandwidth {
-    BW_FULL,
-    BW_25MHZ,
-    BW_20MHZ
-  };
-
-  
-  enum chCoupling { 
-    DC_50R,
-    DC, 
-    AC, 
-  }; 
-
-  enum chName { 
-    A,
-    B,
-    C,
-    D,
-    EXT,
-    AUX
-  }; 
-
+  /* enum chBandwidth { */
+  /*   BW_FULL, */
+  /*   BW_25MHZ, */
+  /*   BW_20MHZ */
+  /* }; */
 
   
-  enum chRange {
-  PS_10MV,
-  PS_20MV,
-  PS_50MV,
-  PS_100MV,
-  PS_200MV,
-  PS_500MV,
-  PS_1V,
-  PS_2V,
-  PS_5V,
-  PS_10V,
-  PS_20V,
-  PS_50V
-  }; 
+  /* enum chCoupling {  */
+  /*   DC_50R, */
+  /*   DC,  */
+  /*   AC,  */
+  /* };  */
 
-  enum devResolution {
-    PS_8BIT,
-    PS_12BIT,
-    PS_14BIT,
-    PS_15BIT,
-    PS_16BIT
-  }; 
+  /* enum chName {  */
+  /*   A, */
+  /*   B, */
+  /*   C, */
+  /*   D, */
+  /*   EXT, */
+  /*   AUX */
+  /* };  */
 
-  enum Model {
-    PS_5000A,
-    PS_6000,
-    PS_UNSUPPORTED
-  };
+
   
-  enum timebases {
+  /* enum chRange { */
+  /* PS_10MV, */
+  /* PS_20MV, */
+  /* PS_50MV, */
+  /* PS_100MV, */
+  /* PS_200MV, */
+  /* PS_500MV, */
+  /* PS_1V, */
+  /* PS_2V, */
+  /* PS_5V, */
+  /* PS_10V, */
+  /* PS_20V, */
+  /* PS_50V */
+  /* };  */
 
+  /* enum devResolution { */
+  /*   PS_8BIT, */
+  /*   PS_12BIT, */
+  /*   PS_14BIT, */
+  /*   PS_15BIT, */
+  /*   PS_16BIT */
+  /* };  */
 
-
-  }; 
+  /* enum Model { */
+  /*   PS_5000A, */
+  /*   PS_6000, */
+  /*   PS_UNSUPPORTED */
+  /* }; */
   
+  /* enum timebases { */
+
+
+
+  /* };  */
   
-  typedef tuple<chName, chBandwidth, chCoupling, chRange, float, bool> Channel; 
+
+
+  
+  typedef tuple<chName, chBandwidth, chCoupling, chRange, float, bool> Channel;
+
   typedef map<chName, Channel> ChannelList; 
 
   
@@ -139,7 +146,9 @@ namespace picoscope {
     virtual void close(); 
     virtual string* unitInfo(); 
     virtual void psUpdate(); 
+    int16_t handle() { return _handle; }; 
 
+    
     //Channel Functions
     virtual void enableChannel(chName name);
     virtual void disableChannel(chName name); 
